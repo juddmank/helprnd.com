@@ -14,7 +14,7 @@
 ## 처음 한 번만 하는 설정
 
 ### 1. GitHub에 올리기
-1. github.com에서 `helprnd`라는 이름으로 **빈 저장소(Public)** 를 만든다. (README 추가하지 않기)
+1. github.com에서 `helprnd.com`이라는 이름으로 **빈 저장소(Public)** 를 만든다. (README 추가하지 않기)
 2. 이 폴더를 그 저장소에 올린다.
 
 ### 2. GitHub Pages 켜기
