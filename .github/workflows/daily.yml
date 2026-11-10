@@ -1,0 +1,58 @@
+name: 매일 공고 업데이트
+
+on:
+  schedule:
+    - cron: "40 21 * * *"   # 한국시간 매일 오전 6:40 (UTC 21:40)
+  workflow_dispatch:        # GitHub 화면에서 'Run workflow' 버튼으로 바로 실행
+  push:
+    branches: [main]
+    paths: ["site/**", ".github/workflows/**"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install python-pptx==1.0.2
+      - name: 공고 모으기
+        env:
+          TZ: Asia/Seoul
+        run: python build_site.py
+      - name: 결과 저장
+        run: |
+          git config user.name "helprnd-bot"
+          git config user.email "helprnd-bot@users.noreply.github.com"
+          git add site data
+          git commit -m "공고 업데이트 $(TZ=Asia/Seoul date +%F)" || echo "변경 없음"
+          git push
+
+  deploy:
+    needs: [update]
+    if: always() && (needs.update.result == 'success' || needs.update.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

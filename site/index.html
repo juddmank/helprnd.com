@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HelpR&amp;D · 정부지원사업 공고 한눈에</title>
+<meta name="description" content="기업마당에 매일 올라오는 중소기업·소상공인·개인사업자 정부지원사업 공고를 지역·분야·마감일별로 한눈에 정리합니다.">
+<meta property="og:title" content="HelpR&D · 정부지원사업 공고 한눈에">
+<meta property="og:description" content="매일 아침 새 정부지원사업 공고를 지역·분야·마감일별로 정리합니다.">
+<meta property="og:url" content="https://helprnd.com/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314243D'/%3E%3Cpath d='M9 23V9h4v5h6V9h4v14h-4v-5h-6v5z' fill='%23F28C28'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --navy:#14243D; --navy-2:#1F3557; --orange:#F28C28; --orange-soft:#FFF3E6;
+  --ink:#1E2633; --muted:#667085; --line:#E4E7EC; --bg:#F5F7FA; --card:#FFFFFF;
+  --red:#D64545; --red-soft:#FDECEC; --green:#1F8A5B;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,"Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* header */
+header.top{background:var(--navy);color:#fff;position:sticky;top:0;z-index:20}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;letter-spacing:-.3px}
+.logo b{color:var(--orange)}
+.logo .mark{width:28px;height:28px;border-radius:7px;background:var(--orange);display:grid;place-items:center;color:var(--navy);font-size:15px;font-weight:900}
+nav a{color:#C9D3E3;text-decoration:none;margin-left:22px;font-size:14px;font-weight:600}
+nav a:hover{color:#fff}
+
+/* hero */
+.hero{background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;padding:44px 0 92px}
+.hero h1{font-size:34px;line-height:1.3;margin:0 0 10px;letter-spacing:-.8px;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero p{margin:0;color:#C9D3E3;font-size:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:-60px}
+.stat{background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:0 6px 24px rgba(20,36,61,.08);border:1px solid var(--line)}
+.stat .n{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.2}
+.stat .l{color:var(--muted);font-size:13px;font-weight:600}
+.stat.hot .n{color:var(--red)}
+.stat.home .n{color:var(--orange)}
+
+/* filters */
+section{padding:28px 0}
+h2{font-size:22px;margin:0 0 14px;letter-spacing:-.5px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.row .lab{font-size:13px;color:var(--muted);font-weight:700;width:44px;flex:none}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink);font-weight:600}
+.chip:hover{border-color:#C3CAD6}
+.chip[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip.accent[aria-pressed=true]{background:var(--orange);border-color:var(--orange)}
+select,input[type=search]{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff;color:var(--ink)}
+input[type=search]{flex:1;min-width:200px}
+.toggle{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;cursor:pointer;user-select:none}
+.toggle input{width:16px;height:16px;accent-color:var(--orange)}
+.resultbar{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px;font-size:14px;color:var(--muted)}
+.resultbar strong{color:var(--ink)}
+
+/* cards */
+.list{display:grid;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;transition:border-color .15s}
+.card:hover{border-color:#C3CAD6}
+.card .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
+.tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;background:#EEF2F7;color:var(--navy-2)}
+.tag.region.home{background:var(--orange-soft);color:#B4610F}
+.tag.new{background:#E7F6EE;color:var(--green)}
+.dday{margin-left:auto;font-weight:800;font-size:14px;color:var(--muted)}
+.dday.hot{color:var(--red)}
+.card h3{margin:0 0 4px;font-size:17px;line-height:1.45;letter-spacing:-.3px}
+.card h3 a{text-decoration:none}
+.card h3 a:hover{text-decoration:underline;text-underline-offset:3px}
+.sub{font-size:13px;color:var(--muted)}
+details{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+summary{cursor:pointer;font-size:14px;font-weight:700;color:var(--navy-2);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";color:var(--orange)}
+details[open] summary::before{content:"▾ "}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}
+.cols h4{margin:0 0 4px;font-size:13px;color:#B4610F}
+.cols p{margin:0;white-space:pre-line;font-size:14px}
+.intro{font-size:13.5px;color:var(--muted);margin-top:10px}
+.go{display:inline-block;margin-top:12px;font-size:14px;font-weight:700;color:var(--navy-2)}
+.more{display:block;margin:16px auto 0;padding:10px 26px}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+
+/* briefings */
+.brief{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.b{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;text-decoration:none}
+.b:hover{border-color:var(--orange)}
+.b .d{font-weight:800}
+.b .c{font-size:13px;color:var(--muted)}
+.b .dl{font-size:13px;font-weight:700;color:#B4610F}
+
+/* about */
+.about{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.about .panel{padding:20px}
+.about ul{margin:6px 0 0;padding-left:18px}
+
+footer{margin-top:30px;background:#0F1B2E;color:#9FAEC6;font-size:13px;padding:26px 0}
+footer a{color:#C9D3E3}
+
+@media (max-width:760px){
+  nav a{margin-left:14px;font-size:13px}
+  .hero{padding:32px 0 84px}
+  .hero h1{font-size:25px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .cols,.about{grid-template-columns:1fr}
+  .row .lab{width:100%}
+}
+@media (max-width:420px){nav a:not(:first-child){display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#"><span class="mark">H</span>Help<b>R&amp;D</b></a>
+    <nav><a href="#find">공고 찾기</a><a href="#brief">브리핑 자료</a><a href="#about">안내</a></nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <h1>오늘 올라온 <em>정부지원사업</em>,<br>한눈에 보세요</h1>
+    <p>기업마당에 매일 올라오는 중소기업·소상공인·개인사업자 지원사업 공고를 매일 아침 정리합니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stats" id="stats">
+    <div class="stat"><div class="n" id="s-open">-</div><div class="l">신청 가능한 공고</div></div>
+    <div class="stat"><div class="n" id="s-new">-</div><div class="l" id="s-new-l">새로 올라온 공고</div></div>
+    <div class="stat hot"><div class="n" id="s-hot">-</div><div class="l">7일 안에 마감</div></div>
+    <div class="stat home"><div class="n" id="s-home">-</div><div class="l">부산·울산·경남 공고</div></div>
+  </div>
+
+  <section id="find">
+    <h2>공고 찾기</h2>
+    <div class="panel">
+      <div class="row"><span class="lab">지역</span><div id="regions" class="row" style="margin:0"></div></div>
+      <div class="row"><span class="lab">분야</span><div id="fields" class="row" style="margin:0"></div></div>
+      <div class="row">
+        <span class="lab">검색</span>
+        <input type="search" id="q" placeholder="사업명, 기관, 지원내용 검색 (예: 수출, 인증, 컨설팅)">
+        <select id="sort" aria-label="정렬">
+          <option value="deadline">마감 빠른 순</option>
+          <option value="new">최근 등록 순</option>
+        </select>
+      </div>
+      <div class="row">
+        <span class="lab"></span>
+        <label class="toggle"><input type="checkbox" id="onlyNew"> 최근 등록일 공고만</label>
+        <label class="toggle"><input type="checkbox" id="onlyHot"> 7일 안에 마감만</label>
+        <label class="toggle"><input type="checkbox" id="showClosed"> 마감된 공고도 보기</label>
+      </div>
+    </div>
+    <div class="resultbar"><span><strong id="count">0</strong>건</span><span id="updated"></span></div>
+    <div class="list" id="list"></div>
+    <button class="chip more" id="more" hidden>더 보기</button>
+  </section>
+
+  <section id="brief">
+    <h2>날짜별 브리핑 자료 (PPT)</h2>
+    <div class="brief" id="briefs"></div>
+  </section>
+
+  <section id="about">
+    <h2>안내</h2>
+    <div class="about">
+      <div class="panel">
+        <strong>HelpR&amp;D는 이런 곳이에요</strong>
+        <ul>
+          <li>정부·지자체 지원사업 공고를 매일 아침 자동으로 모아 정리합니다.</li>
+          <li>공고마다 <b>신청요건</b>과 <b>지원내용</b>을 뽑아 두어, 원문을 열기 전에 해당 여부를 빠르게 판단할 수 있습니다.</li>
+          <li>부산·울산·경남 공고는 따로 모아 보기 쉽게 표시합니다.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <strong>꼭 확인하세요</strong>
+        <ul>
+          <li>이 사이트의 내용은 요약입니다. 신청 전에 반드시 원문 공고(기업마당)를 확인하세요.</li>
+          <li>신청·문의는 각 공고의 수행기관에서 받습니다.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    출처: <a href="https://www.bizinfo.go.kr" target="_blank" rel="noopener">기업마당 지원사업 공고 (bizinfo.go.kr)</a> · 매일 아침 자동 업데이트<br>
+    © HelpR&amp;D · helprnd.com
+  </div>
+</footer>
+
+<script>
+(function(){
+  const HOMES = ["부산","울산","경남"];
+  const FIELDS = ["경영","금융","창업","인력","기술","수출","내수","기타"];
+  const PAGE = 30;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const iso = d => d.toISOString().slice(0,10);
+  let items = [], shown = PAGE, latestDate = "";
+  const st = {region:"전체", field:"전체", q:"", sort:"deadline", onlyNew:false, onlyHot:false, showClosed:false};
+  const $ = id => document.getElementById(id);
+
+  function dday(r){
+    if(!r.end) return {label: r.period ? "상시" : "-", d: 9999};
+    const e = new Date(r.end+"T00:00:00");
+    const d = Math.round((e - today)/86400000);
+    return {label: d < 0 ? "마감" : d === 0 ? "오늘 마감" : "D-"+d, d};
+  }
+  const esc = s => (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  function chips(el, list, key, extraClass){
+    el.innerHTML = "";
+    list.forEach(([val,label,cls]) => {
+      const b = document.createElement("button");
+      b.className = "chip" + (cls ? " "+cls : "");
+      b.textContent = label;
+      b.setAttribute("aria-pressed", st[key] === val);
+      b.onclick = () => { st[key] = val; shown = PAGE; renderChips(); render(); };
+      el.appendChild(b);
+    });
+  }
+  function renderChips(){
+    const regs = {};
+    items.forEach(r => regs[r.region] = (regs[r.region]||0)+1);
+    const others = Object.keys(regs).filter(r => r !== "전국" && !HOMES.includes(r)).sort();
+    chips($("regions"), [["전체","전체"],["동남권","부산·울산·경남","accent"],["전국","전국(중앙부처)"],
+      ...HOMES.map(r=>[r,r]), ...others.map(r=>[r,r])], "region");
+    chips($("fields"), [["전체","전체"], ...FIELDS.map(f=>[f,f])], "field");
+  }
+
+  function match(r){
+    const dd = dday(r).d;
+    if(!st.showClosed && dd < 0) return false;
+    if(st.region === "동남권" && !HOMES.includes(r.region)) return false;
+    if(st.region !== "전체" && st.region !== "동남권" && r.region !== st.region) return false;
+    if(st.field !== "전체" && r.field !== st.field) return false;
+    if(st.onlyNew && r.date !== latestDate) return false;
+    if(st.onlyHot && !(dd >= 0 && dd <= 7)) return false;
+    if(st.q){
+      const hay = (r.title+" "+r.org+" "+r.agency+" "+r.target+" "+r.support+" "+r.intro).toLowerCase();
+      if(!st.q.toLowerCase().split(/\s+/).every(w => hay.includes(w))) return false;
+    }
+    return true;
+  }
+
+  function card(r){
+    const dd = dday(r);
+    const hot = dd.d >= 0 && dd.d <= 7;
+    const home = HOMES.includes(r.region);
+    const org = r.agency && r.agency !== r.org ? r.org+" · "+r.agency : r.org;
+    return `<article class="card">
+      <div class="meta">
+        <span class="tag region ${home?"home":""}">${esc(r.region)}</span>
+        <span class="tag">${esc(r.field)}</span>
+        ${r.date === latestDate ? '<span class="tag new">NEW</span>' : ""}
+        <span class="dday ${hot?"hot":""}">${dd.label}</span>
+      </div>
+      <h3><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a></h3>
+      <div class="sub">신청기간 ${esc(r.period||"-")} · ${esc(org)} · 등록 ${esc(r.date)}</div>
+      <details>
+        <summary>신청요건 · 지원내용 보기</summary>
+        <div class="cols">
+          <div><h4>신청요건</h4><p>${esc(r.target || "원문 공고에서 확인해 주세요.")}</p></div>
+          <div><h4>지원내용</h4><p>${esc(r.support || "원문 공고에서 확인해 주세요.")}</p></div>
+        </div>
+        ${r.intro ? `<div class="intro">${esc(r.intro)}</div>` : ""}
+        <a class="go" href="${esc(r.url)}" target="_blank" rel="noopener">기업마당 원문 공고 보기 →</a>
+      </details>
+    </article>`;
+  }
+
+  function render(){
+    let rows = items.filter(match);
+    if(st.sort === "deadline"){
+      rows.sort((a,b) => { const x=dday(a).d, y=dday(b).d; return (x<0?99999:x)-(y<0?99999:y) || b.num-a.num; });
+    } else rows.sort((a,b) => b.num - a.num);
+    $("count").textContent = rows.length.toLocaleString();
+    $("list").innerHTML = rows.length ? rows.slice(0, shown).map(card).join("")
+      : '<div class="empty">조건에 맞는 공고가 없어요. 필터를 바꿔 보세요.</div>';
+    $("more").hidden = rows.length <= shown;
+  }
+
+  function stats(){
+    const open = items.filter(r => dday(r).d >= 0);
+    $("s-open").textContent = open.length;
+    $("s-new").textContent = items.filter(r => r.date === latestDate).length;
+    $("s-new-l").textContent = latestDate ? `새로 올라온 공고 (${latestDate.slice(5).replace("-","/")})` : "새로 올라온 공고";
+    $("s-hot").textContent = open.filter(r => dday(r).d <= 7).length;
+    $("s-home").textContent = open.filter(r => HOMES.includes(r.region)).length;
+  }
+
+  $("q").addEventListener("input", e => { st.q = e.target.value.trim(); shown = PAGE; render(); });
+  $("sort").addEventListener("change", e => { st.sort = e.target.value; render(); });
+  ["onlyNew","onlyHot","showClosed"].forEach(k => $(k).addEventListener("change", e => { st[k] = e.target.checked; shown = PAGE; render(); }));
+  $("more").onclick = () => { shown += PAGE; render(); };
+
+  fetch("data/announcements.json", {cache:"no-cache"}).then(r => r.json()).then(db => {
+    items = db.items || [];
+    latestDate = items.reduce((m,r) => r.date > m ? r.date : m, "");
+    $("updated").textContent = "업데이트 " + (db.updated || "").replace("T"," ");
+    renderChips(); stats(); render();
+  }).catch(() => { $("list").innerHTML = '<div class="empty">공고 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>'; });
+
+  fetch("data/briefings.json", {cache:"no-cache"}).then(r => r.json()).then(list => {
+    $("briefs").innerHTML = list.map(b => `<a class="b" href="${encodeURI(b.ppt)}" download>
+      <span><span class="d">${b.date}</span><br><span class="c">새 공고 ${b.count}건 · 부울경 ${Object.values(b.regions||{}).reduce((a,c)=>a+c,0)}건</span></span>
+      <span class="dl">PPT 받기 ↓</span></a>`).join("") || '<div class="empty">아직 브리핑 자료가 없어요.</div>';
+  }).catch(() => {});
+})();
+</script>
+</body>
+</html>
