@@ -32,8 +32,8 @@ def to_record(it, added):
     end = b.end_date(it["period"])
     return {
         "id": it["id"], "num": it["num"], "title": it["title"], "field": it["field"],
-        "region": "부산" if it.get("source") == "btp" else (b.region_of(it) or "전국"),
-        "src": "부산TP" if it.get("source") == "btp" else "기업마당", "period": it["period"], "end": end.isoformat() if end else None,
+        "region": it.get("tp_region") or b.region_of(it) or "전국",
+        "src": it["org"] if it.get("tp_region") else "기업마당", "period": it["period"], "end": end.isoformat() if end else None,
         "org": it["org"], "agency": it["agency"], "date": it["date"], "added": added,
         "intro": it.get("intro", ""), "target": it.get("target", ""), "support": it.get("support", ""),
         "url": b.link_of(it),
@@ -59,21 +59,15 @@ def main():
     # 모든 새 공고의 신청요건·지원내용을 가져온다 (사이트 방문자는 전국 사람들이라 지역 구분 없이)
     b.add_details(items)
 
-    # 부산테크노파크 사업공고 (처음이면 최근 7일, 그다음부터는 지난번 이후 새 글만)
-    try:
-        btp = b.btp_collect(state.get("btp_last_seq", 0), (today - dt.timedelta(days=7)).isoformat())
-        btp = [x for x in btp if "마감" not in x.get("state", "")]
-    except Exception as e:
-        print(f"[warn] 부산테크노파크 수집 실패: {e}", flush=True)
-        btp = []
-    print(f"부산테크노파크 새 공고 {len(btp)}건", flush=True)
-
-    # 그날 브리핑 PPT (Kay님용 구성 그대로; build 안에서 관심 지역 상세는 이미 채워져 있으면 다시 받지 않음)
-    ppt_name = f"{today.isoformat()}_지원사업공고.pptx"
-    summary = b.build(items, today, since_label, BRIEF / ppt_name, btp)
+    # 지역 테크노파크 사업공고 (처음이면 최근 7일, 그다음부터는 지난번 이후 새 글만). 한 곳이 실패해도 계속한다.
+    btp, tp_report = b.collect_technoparks(state, today)
+    print(f"테크노파크 새 공고 {len(btp)}건 {tp_report}", flush=True)
 
     # 공고 목록 갱신
     db = load(DATA / "announcements.json", {"items": []})
+    for r in db["items"]:  # 예전 표기 정리
+        if r.get("src") == "부산TP":
+            r["src"] = "부산테크노파크"
     known = {r["id"]: r for r in db["items"]}
     for it in items + btp:
         known[it["id"]] = to_record(it, today.isoformat())
@@ -81,11 +75,24 @@ def main():
     keep = [r for r in known.values()
             if (r["end"] is None and r["added"] >= cutoff) or (r["end"] and r["end"] >= today.isoformat())
             or r["added"] >= cutoff]
-    keep.sort(key=lambda r: (r["date"], r["num"] if r.get("src") != "부산TP" else 0), reverse=True)
+    tp_all = [r for r in keep if r.get("src", "기업마당") != "기업마당"]
+    keep = [r for r in keep if r.get("src", "기업마당") != "기업마당"] +         b.drop_tp_duplicates([r for r in keep if r.get("src", "기업마당") == "기업마당"], tp_all)
+    keep.sort(key=lambda r: (r["date"], r["num"] if r.get("src", "기업마당") == "기업마당" else 0), reverse=True)
 
+    # 그날 브리핑 PPT: 오늘 들어온 공고 전체로 만든다 (하루에 여러 번 돌아도 그날 것을 모두 담도록)
     briefings = load(DATA / "briefings.json", [])
+    prev = next((x for x in briefings if x["date"] == today.isoformat()), None)
+    if prev:
+        since_label = prev.get("since", since_label)
+    todays = [dict(r, views="0", **({"tp_region": r["region"]} if r.get("src", "기업마당") != "기업마당" else {}))
+              for r in keep if r["added"] == today.isoformat()]
+    biz_today = [r for r in todays if "tp_region" not in r]
+    tp_today = [r for r in todays if "tp_region" in r]
+    ppt_name = f"{today.isoformat()}_지원사업공고.pptx"
+    summary = b.build(biz_today, today, since_label, BRIEF / ppt_name, tp_today)
+
     briefings = [x for x in briefings if x["date"] != today.isoformat()]
-    briefings.insert(0, {"date": today.isoformat(), "count": len(items) + len(btp), "btp": len(btp), "since": since_label,
+    briefings.insert(0, {"date": today.isoformat(), "count": len(todays), "tp": len(tp_today), "since": since_label,
                          "ppt": f"briefings/{ppt_name}",
                          "regions": {r: summary.get(r, 0) for r in b.HOMES}, "national": summary.get("national", 0)})
 
@@ -96,11 +103,9 @@ def main():
 
     if items:
         state["last_num"] = max(i["num"] for i in items)
-    if btp:
-        state["btp_last_seq"] = max(x["seq"] for x in btp)
     state["last_run"] = today.isoformat()
     STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({"new": len(items), "btp": len(btp), "kept": len(keep), "ppt": ppt_name}, ensure_ascii=False))
+    print(json.dumps({"new": len(items), "tp": len(btp), "today_total": len(todays), "kept": len(keep), "ppt": ppt_name}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

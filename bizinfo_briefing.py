@@ -206,6 +206,170 @@ def btp_collect(since_seq, since_date, max_pages=5):
     return out
 
 
+def _with_tp(items, key, org, region):
+    for it in items:
+        it.update({"source": key, "org": org, "tp_region": region})
+    return items
+
+
+# ---------------- 공고 본문에서 '지원대상'·'지원내용' 줄 골라내기 (울산·경남TP 공통) ----------------
+TARGET_KEYS = ("지원대상", "모집대상", "신청대상", "신청자격", "지원자격", "참가자격", "참여대상", "참가대상", "대상기업")
+SUPPORT_KEYS = ("지원내용", "지원규모", "지원사항", "지원금액", "지원분야", "모집규모", "모집내용", "지원혜택", "임대내용")
+
+
+def extract_sections(text):
+    lines = [l.strip() for l in re.split(r"[\r\n]+", text or "") if l.strip()]
+    found = {"target": [], "support": []}
+    cur = None
+    for l in lines:
+        bare = re.sub(r"\s+", "", l)
+        head = re.match(r"^[□■○●◦ㅇ\-\*·•▶▷※\d\.\)]*\s*", l)
+        label_zone = re.sub(r"\s+", "", l[head.end():][:14]) if head else bare[:14]
+        hit = None
+        if any(label_zone.startswith(k) for k in TARGET_KEYS):
+            hit = "target"
+        elif any(label_zone.startswith(k) for k in SUPPORT_KEYS):
+            hit = "support"
+        if hit:
+            cur = hit
+            val = re.split(r"[:：]", l, 1)
+            val = val[1].strip() if len(val) > 1 else ""
+            if val:
+                found[hit].append(val)
+            continue
+        if cur and re.match(r"^[\-◦ㆍ·•\*※]|^\(|^[가-하]\.", l):
+            found[cur].append(l)
+            continue
+        if cur and re.match(r"^[□■○●ㅇ]", l):
+            cur = None
+    return {k: "\n".join(v[:6]) for k, v in found.items()}
+
+
+# ---------------- 울산테크노파크 (utp.or.kr, JSON) ----------------
+UTP_API = "https://www.utp.or.kr/proc/re_ancmt/list.php"
+UTP_VIEW = "https://www.utp.or.kr/include/contents.php?mnuno=M0000018&menu_group=1&sno=0102&task=view&seq={seq}"
+
+
+def utp_collect(since_seq, since_date, max_pages=3):
+    out = []
+    for page in range(1, max_pages + 1):
+        data = json.loads(fetch(f"{UTP_API}?task=list&page={page}")).get("data") or []
+        if not data:
+            break
+        for d in data:
+            seq = int(d["seq"])
+            created = d["created_dt"][:10]
+            new = seq > since_seq if since_seq else created >= since_date
+            if not new or d.get("status") == "3":
+                continue
+            out.append({"seq": seq, "id": f"UTP_{seq}", "num": seq, "title": clean(d["title"]),
+                        "period": f'{d["apply_start_dt"][:10]} ~ {d["apply_end_dt"][:10]}',
+                        "state": {"1": "접수중", "2": "접수전"}.get(d.get("status"), ""), "date": created,
+                        "views": str(d.get("hit_cnt", "0")), "agency": "", "field": "기타",
+                        "url": UTP_VIEW.format(seq=seq)})
+        if all(d.get("is_gonggi") != "Y" and d["created_dt"][:10] < since_date for d in data[-3:]) and not since_seq:
+            break
+        time.sleep(0.5)
+    uniq = {it["seq"]: it for it in out}
+    out = list(uniq.values())
+    for it in out:
+        try:
+            v = json.loads(fetch(f"{UTP_API}?task=getItem&seq={it['seq']}"))["data"]
+            sec = extract_sections((v.get("supported_target") or "") + "\n" + (v.get("outline") or ""))
+            it.update({"target": sec["target"] or re.sub(r"^[□\s]*지원대상\s*", "", v.get("supported_target") or "").strip(),
+                       "support": sec["support"], "intro": clean(v.get("content") or "")})
+        except Exception:
+            it.update({"target": "", "support": "", "intro": ""})
+        time.sleep(0.3)
+    return out
+
+
+# ---------------- 경남테크노파크 (gntp.or.kr) ----------------
+GNTP_LIST = "https://www.gntp.or.kr/biz/apply"
+GNTP_VIEW = "https://www.gntp.or.kr/biz/applyInfo/{seq}"
+
+
+def gntp_collect(since_seq, since_date):
+    h = fetch(GNTP_LIST)
+    body = h[h.find('id="gridData"'):]
+    out = []
+    for tr in re.findall(r'<tr class="table-contents">(.*?)</tr>', body, re.S):
+        m = re.search(r"/biz/applyInfo/(\d+)", tr)
+        tds = re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)
+        if not m or len(tds) < 8:
+            continue
+        seq = int(m.group(1))
+        start = (re.findall(r"\d{4}-\d{2}-\d{2}", tds[5]) or [""])[0]
+        end = (re.findall(r"\d{4}-\d{2}-\d{2}", tds[6]) or [""])[0]
+        state = clean(tds[7])
+        new = seq > since_seq if since_seq else start >= since_date
+        if not new or "마감" in state:
+            continue
+        out.append({"seq": seq, "id": f"GNTP_{seq}", "num": seq, "title": clean(tds[4]),
+                    "period": f"{start} ~ {end}", "state": state, "date": start, "views": "0",
+                    "agency": clean(tds[2]), "field": "기타", "url": GNTP_VIEW.format(seq=seq)})
+    for it in out:
+        try:
+            v = fetch(it["url"])
+            t = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", v, flags=re.S)
+            t = re.sub(r"<br\s*/?>|</p>|</div>|</li>|</tr>|</td>|</th>", "\n", t)
+            t = html.unescape(re.sub(r"<[^>]+>", " ", t))
+            t = "\n".join(re.sub(r"[ \t]+", " ", l).strip() for l in t.split("\n"))
+            body_txt = t[t.find("공고 제"):] if "공고 제" in t else t
+            sec = extract_sections(body_txt)
+            intro = re.search(r"호\s*\n+[^\n]*\n+([^\n]{30,})", body_txt)
+            it.update({"target": sec["target"], "support": sec["support"], "intro": intro.group(1).strip() if intro else ""})
+        except Exception:
+            it.update({"target": "", "support": "", "intro": ""})
+        time.sleep(0.3)
+    return out
+
+
+def _norm_title(t):
+    return re.sub(r"\[[^\]]*\]|[^가-힣A-Za-z0-9]", "", t)
+
+
+def drop_tp_duplicates(biz, tp):
+    """같은 공고가 기업마당과 테크노파크 양쪽에 있으면 기업마당 쪽을 뺀다 (TP 원문이 더 자세함)."""
+    keys = [_norm_title(t["title"]) for t in tp]
+    def dup(x):
+        nx = _norm_title(x["title"])
+        return any(nx == k or (len(k) > 15 and (k in nx or nx in k)) for k in keys)
+    return [x for x in biz if not dup(x)]
+
+
+# 지역 테크노파크 목록 (키, 기관명, 지역, 수집함수) — 새 TP는 여기에 한 줄 추가
+TP_SOURCES = [
+    ("btp", "부산테크노파크", "부산", btp_collect),
+    ("utp", "울산테크노파크", "울산", utp_collect),
+    ("gntp", "경남테크노파크", "경남", gntp_collect),
+]
+
+
+def collect_technoparks(state, today, days=7):
+    """모든 TP에서 새 공고를 모은다. 한 곳이 실패해도 나머지는 계속한다. state는 그 자리에서 갱신된다."""
+    since_date = (today - dt.timedelta(days=days)).isoformat()
+    allitems, report = [], {}
+    for key, org, region, fn in TP_SOURCES:
+        try:
+            got = fn(state.get(f"{key}_last_seq", 0), since_date)
+            got = [x for x in got if "마감" not in x.get("state", "")]
+            for it in got:
+                if it.get("field") in FIELD_ORDER and it["field"] != "기타":
+                    continue
+                it["field"] = next((v for k, v in BTP_FIELD.items() if k in it.get("field", "")), None) \
+                    or next((v for k, v in BTP_FIELD.items() if k in it["title"]), "기타")
+            _with_tp(got, key, org, region)
+            if got:
+                state[f"{key}_last_seq"] = max(state.get(f"{key}_last_seq", 0), max(x["seq"] for x in got))
+            allitems += got
+            report[org] = len(got)
+        except Exception as e:
+            print(f"[warn] {org} 수집 실패: {e}", file=sys.stderr)
+            report[org] = "실패"
+    return allitems, report
+
+
 # ---------------- 분류 ----------------
 def region_of(item):
     m = re.match(r"\s*\[([^\]]+)\]", item["title"])
@@ -343,6 +507,7 @@ def detail_slides(prs, title, rows, today, foot):
 
 def build(items, today, since_label, out_path, btp=None):
     btp = btp or []
+    items = drop_tp_duplicates(items, btp)
     prs = Presentation()
     prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
 
@@ -358,7 +523,7 @@ def build(items, today, since_label, out_path, btp=None):
         return (dday(i["period"], today)[1] if dday(i["period"], today)[1] >= 0 else 998,)
     urgent = sorted([i for i in home + national + btp if 0 <= dday(i["period"], today)[1] <= 7], key=sort_key)
     stamp = today.strftime("%Y년 %m월 %d일") + " " + "월화수목금토일"[today.weekday()] + "요일"
-    foot = f"출처: 기업마당(bizinfo.go.kr)" + (" · 부산테크노파크(btp.or.kr)" if btp else "") + f" · {since_label} 등록분 · 신청 전 원문 공고를 꼭 확인하세요"
+    foot = f"출처: 기업마당(bizinfo.go.kr)" + (" · 지역 테크노파크" if btp else "") + f" · {since_label} 등록분 · 신청 전 원문 공고를 꼭 확인하세요"
 
     # 1. 표지
     s = prs.slides.add_slide(prs.slide_layouts[6])
@@ -369,13 +534,13 @@ def build(items, today, since_label, out_path, btp=None):
     acc = s.shapes.add_shape(1, Inches(0.8), Inches(3.15), Inches(1.6), Inches(0.08))
     acc.fill.solid(); acc.fill.fore_color.rgb = ORANGE; acc.line.fill.background()
     stats = ([("새 공고", len(items), WHITE)] + [(r, len(by_home[r]), ORANGE) for r in HOMES]
-             + [("부산TP", len(btp), ORANGE), ("전국", len(national), WHITE), ("7일 내 마감", len(urgent), WHITE)])
+             + [("테크노파크", len(btp), ORANGE), ("전국", len(national), WHITE), ("7일 내 마감", len(urgent), WHITE)])
     step = 11.7 / len(stats)
     for k, (label, n, color) in enumerate(stats):
         x = Inches(0.8 + k * step)
         tb(s, x, Inches(3.8), Inches(step - 0.2), Inches(1.0), str(n), 48, True, color)
         tb(s, x, Inches(4.9), Inches(step - 0.2), Inches(0.4), label, 16, False, RGBColor(0xC9, 0xD3, 0xE3))
-    tb(s, Inches(0.8), Inches(6.5), Inches(11.5), Inches(0.4), f"helprnd.com · {since_label} 기업마당·부산테크노파크에 올라온 공고", 12, False,
+    tb(s, Inches(0.8), Inches(6.5), Inches(11.5), Inches(0.4), f"helprnd.com · {since_label} 기업마당·지역 테크노파크에 올라온 공고", 12, False,
        RGBColor(0x9F, 0xAE, 0xC6))
 
     if not items and not btp:
@@ -426,8 +591,16 @@ def build(items, today, since_label, out_path, btp=None):
     if urgent:
         lines.append(f"• 7일 안에 마감되는 공고 {len(urgent)}건 (다음 장)")
     if btp:
-        lines.append(f"• 부산테크노파크 새 공고 {len(btp)}건 (따로 정리)")
-    top = sorted(national, key=lambda i: -int(re.sub(r'\D', '', i['views']) or 0))[:3]
+        tpc = {}
+        for i in btp:
+            tpc[i["org"].replace("테크노파크", "")] = tpc.get(i["org"].replace("테크노파크", ""), 0) + 1
+        lines.append(f"• 테크노파크 새 공고 {len(btp)}건 (" + " · ".join(f"{k} {v}" for k, v in tpc.items()) + ")")
+    by_org = {}
+    for i in national:
+        by_org[i["org"]] = by_org.get(i["org"], 0) + 1
+    if by_org:
+        lines.append("• 부처별: " + " · ".join(f"{o} {n}" for o, n in sorted(by_org.items(), key=lambda kv: -kv[1])[:4]))
+    top = sorted(national, key=lambda i: -int(re.sub(r'\D', '', i['views']) or 0))[:2]
     for i in top:
         lines.append(f"• 조회 많은 전국 공고: {i['title'][:38]}{'…' if len(i['title']) > 38 else ''}")
     if others:
@@ -460,13 +633,13 @@ def build(items, today, since_label, out_path, btp=None):
                         rows_sorted[k:k + 10], today, foot)
         detail_slides(prs, f"{r} 공고 · 신청요건과 지원내용", rows_sorted, today, foot)
 
-    # 4-1. 부산테크노파크 사업공고 (btp.or.kr 직접 수집)
+    # 4-1. 지역 테크노파크 사업공고 (각 TP 사이트에서 직접 수집)
     if btp:
         btp_sorted = sorted(btp, key=sort_key)
         for k in range(0, len(btp_sorted), 10):
-            table_slide(prs, "부산테크노파크 공고", f"{len(btp)}건" + (f" · {k // 10 + 1}쪽" if len(btp) > 10 else ""),
+            table_slide(prs, "테크노파크 공고", f"{len(btp)}건" + (f" · {k // 10 + 1}쪽" if len(btp) > 10 else ""),
                         btp_sorted[k:k + 10], today, foot)
-        detail_slides(prs, "부산테크노파크 공고 · 신청요건과 지원내용", btp_sorted, today, foot)
+        detail_slides(prs, "테크노파크 공고 · 신청요건과 지원내용", btp_sorted, today, foot)
 
     # 5. 전국(중앙부처) — 분야별
     nat_sorted = sorted(national, key=lambda i: (FIELD_ORDER.index(i["field"]) if i["field"] in FIELD_ORDER else 9))
@@ -524,7 +697,11 @@ def build(items, today, since_label, out_path, btp=None):
     prs.save(out_path)
     summary = {"total": len(items)}
     summary.update({r: len(by_home[r]) for r in HOMES})
-    summary.update({"btp": len(btp), "btp_titles": [i["title"] for i in sorted(btp, key=sort_key)][:3]})
+    tp_by = {}
+    for i in btp:
+        tp_by[i["org"]] = tp_by.get(i["org"], 0) + 1
+    summary.update({"tp": len(btp), "tp_by_org": tp_by,
+                    "tp_titles": [f'[{i["org"].replace("테크노파크", "TP")}] {i["title"]}' for i in sorted(btp, key=sort_key)][:5]})
     summary.update({"national": len(national), "others": len(others), "urgent": len(urgent),
                     "home_titles": {r: [i["title"] for i in by_home[r]][:3] for r in HOMES}})
     return summary
@@ -550,19 +727,12 @@ def main():
     else:
         since_label = f"{since_date} 이후"
 
-    # 부산테크노파크: 처음이면 최근 7일, 그다음부터는 지난번 이후 새 글만
-    btp_seq = state.get("btp_last_seq", 0)
-    try:
-        btp = btp_collect(btp_seq, (today - dt.timedelta(days=7)).isoformat())
-        btp = [b for b in btp if "마감" not in b.get("state", "")]
-    except Exception as e:
-        print(f"[warn] 부산테크노파크 수집 실패: {e}", file=sys.stderr)
-        btp = None
+    # 지역 테크노파크(부산·울산·경남 …): 처음이면 최근 7일, 그다음부터는 지난번 이후 새 글만
+    btp, tp_report = collect_technoparks(state, today)
 
     out_path = out_dir / f"{today.isoformat()}_지원사업공고.pptx"
     summary = build(items, today, since_label, out_path, btp)
-    if btp:
-        state["btp_last_seq"] = max(b["seq"] for b in btp)
+    summary["tp_report"] = tp_report
     if items:
         state["last_num"] = max(i["num"] for i in items)
     elif not since_num:
