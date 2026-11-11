@@ -46,11 +46,27 @@ FONT = "맑은 고딕"
 
 
 # ---------------- 수집 ----------------
+def _ssl_context():
+    """기본 인증서 + 일부 기관 사이트가 빠뜨린 중간 인증서(certs/extra_intermediates.pem)로 검증한다."""
+    import ssl
+    ctx = ssl.create_default_context()
+    extra = HERE / "certs" / "extra_intermediates.pem"
+    if extra.exists():
+        ctx.load_verify_locations(str(extra))
+    return ctx
+
+
+SSL_CTX = None
+
+
 def fetch(url, tries=3):
+    global SSL_CTX
+    if SSL_CTX is None:
+        SSL_CTX = _ssl_context()
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (bizinfo-briefing)"})
-            with urllib.request.urlopen(req, timeout=20) as r:
+            with urllib.request.urlopen(req, timeout=30, context=SSL_CTX) as r:
                 return r.read().decode("utf-8", "replace")
         except Exception as e:
             if i == tries - 1:
@@ -329,6 +345,181 @@ def _norm_title(t):
     return re.sub(r"\[[^\]]*\]|[^가-힣A-Za-z0-9]", "", t)
 
 
+def page_lines(page_html):
+    t = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", page_html, flags=re.S)
+    t = re.sub(r"<br\s*/?>|</p>|</div>|</li>|</tr>|</td>|</th>|</dt>|</dd>|</h\d>", "\n", t)
+    t = html.unescape(re.sub(r"<[^>]+>", " ", t))
+    return [l for l in (re.sub(r"\s+", " ", x).strip() for x in t.split("\n")) if l]
+
+
+STOP_LABELS = ("공고기간", "접수기간", "접수방법", "신청방법", "문의처", "관련문의", "기타", "사업명", "사업기간",
+               "첨부파일", "담당자", "담당부서", "선정방법", "제출서류", "목록", "목록으로", "다음글", "이전글")
+
+
+def extract_pairs(lines, limit=6):
+    """'지원대상' 같은 제목 줄 다음 줄들에 값이 오는 표 모양 상세 페이지용 (대구·포항TP)."""
+    out = {"target": [], "support": []}
+    cur = None
+    for l in lines:
+        key = re.sub(r"[\s\.·:：]", "", l)
+        if key in TARGET_KEYS:
+            cur = "target"; continue
+        if key in SUPPORT_KEYS:
+            cur = "support"; continue
+        if key in STOP_LABELS or (len(key) <= 8 and l.startswith(".")):
+            cur = None; continue
+        if cur and len(out[cur]) < limit:
+            out[cur].append(l)
+    return {k: "\n".join(v) for k, v in out.items()}
+
+
+def _body_after(lines, marker_regex):
+    for n, l in enumerate(lines):
+        if re.search(marker_regex, l):
+            return lines[n:]
+    return lines
+
+
+# ---------------- 대구테크노파크 (ttp.org) ----------------
+TTP_LIST = "https://www.ttp.org/bbs/BoardControll.do?bbsId=BBSMSTR_000000000003&pageIndex={page}"
+TTP_VIEW = "https://www.ttp.org/bbs/BoardControllView.do?nttId={seq}&bbsId=BBSMSTR_000000000003"
+
+
+def ttp_collect(since_seq, since_date, max_pages=2):
+    out = []
+    for page in range(1, max_pages + 1):
+        h = fetch(TTP_LIST.format(page=page))
+        body = h[h.find("<tbody"):h.find("</tbody>")]
+        rows = re.findall(r"<tr>(.*?)</tr>", body, re.S)
+        if not rows:
+            break
+        old = 0
+        for r in rows:
+            m = re.search(r"fn_egov_inqire_notice\('(\d+)'", r)
+            tds = [clean(x) for x in re.findall(r"<td[^>]*>(.*?)</td>", r, re.S)]
+            if not m or len(tds) < 8:
+                continue
+            seq, date, state = int(m.group(1)), tds[7], tds[4]
+            a = re.search(r'class="tooltiptext"><a[^>]*>([^<]+)', r) or re.search(r'<a href="#link"[^>]*>\s*([^<]+?)\s*</a>', r)
+            title = clean(a.group(1)) if a else tds[2]
+            new = seq > since_seq if since_seq else date >= since_date
+            if not new:
+                old += 1
+                continue
+            if "완료" in state or "마감" in state:
+                continue
+            ds = re.findall(r"\d{4}-\d{2}-\d{2}", tds[3])
+            out.append({"seq": seq, "id": f"TTP_{seq}", "num": seq, "title": title,
+                        "period": " ~ ".join(ds) if ds else state, "state": state, "date": date,
+                        "views": re.sub(r"\D", "", tds[8]) if len(tds) > 8 else "0", "agency": tds[1],
+                        "field": "기타", "url": TTP_VIEW.format(seq=seq)})
+        if old >= len(rows) - 2:
+            break
+        time.sleep(0.5)
+    for it in out:
+        try:
+            L = page_lines(fetch(it["url"]))
+            body = _body_after(L, r"공고 제")
+            pairs = extract_pairs(body)
+            intro = next((l for l in body[2:8] if len(l) > 40), "")
+            it.update({"target": pairs["target"], "support": pairs["support"], "intro": intro})
+        except Exception:
+            it.update({"target": "", "support": "", "intro": ""})
+        time.sleep(0.3)
+    return out
+
+
+# ---------------- 경북테크노파크 (gbtp.or.kr) ----------------
+GBTP_LIST = "https://www.gbtp.or.kr/user/board.do?bbsId=BBSMSTR_000000000021&pageIndex={page}"
+GBTP_VIEW = "https://www.gbtp.or.kr/user/boardDetail.do?bbsId=BBSMSTR_000000000021&nttNo={seq}"
+
+
+def gbtp_collect(since_seq, since_date, max_pages=2):
+    out = []
+    for page in range(1, max_pages + 1):
+        h = fetch(GBTP_LIST.format(page=page))
+        body = h[h.find("<tbody"):]
+        body = body[:body.find("</tbody>")]
+        rows = re.findall(r"<tr>(.*?)</tr>", body, re.S)
+        if not rows:
+            break
+        old = 0
+        for r in rows:
+            m = re.search(r"fn_detail\('(\d+)'", r)
+            tds = [clean(x) for x in re.findall(r"<td[^>]*>(.*?)</td>", r, re.S)]
+            if not m or len(tds) < 4:
+                continue
+            seq = int(m.group(1))
+            date = (re.findall(r"\d{4}-\d{2}-\d{2}", tds[2]) or [""])[0]
+            ds = re.findall(r"\d{4}-\d{2}-\d{2}", tds[3])
+            state = tds[4] if len(tds) > 4 else tds[-1]
+            new = seq > since_seq if since_seq else date >= since_date
+            if not new:
+                old += 1
+                continue
+            if "마감" in state or "완료" in state:
+                continue
+            out.append({"seq": seq, "id": f"GBTP_{seq}", "num": seq, "title": tds[1],
+                        "period": " ~ ".join(ds), "state": state, "date": date, "views": "0",
+                        "agency": "", "field": "기타", "url": GBTP_VIEW.format(seq=seq)})
+        if old >= len(rows) - 2:
+            break
+        time.sleep(0.5)
+    for it in out:
+        try:
+            L = page_lines(fetch(it["url"]))
+            dept = next((L[n + 1] for n, l in enumerate(L) if l == "담당부서" and n + 1 < len(L)), "")
+            body = _body_after(L, r"^내용$")[1:]
+            body = body[:next((n for n, l in enumerate(body) if l in ("다음글", "이전글")), len(body))]
+            sec = extract_sections("\n".join(body))
+            pairs = extract_pairs(body)
+            intro = " ".join(body)[:300].strip('" ')
+            it.update({"agency": dept, "target": sec["target"] or pairs["target"],
+                       "support": sec["support"] or pairs["support"], "intro": intro})
+        except Exception:
+            it.update({"target": "", "support": "", "intro": ""})
+        time.sleep(0.3)
+    return out
+
+
+# ---------------- 포항테크노파크 (ptp.or.kr) ----------------
+PTP_LIST = "https://www.ptp.or.kr/main/board/index.do?menu_idx=116&manage_idx=15&pageIndex={page}"
+PTP_VIEW = "https://www.ptp.or.kr/main/board/view.do?menu_idx=116&manage_idx=15&board_idx={seq}"
+
+
+def ptp_collect(since_seq, since_date):
+    h = fetch(PTP_LIST.format(page=1))
+    body = h[h.find("<tbody"):]
+    body = body[:body.find("</tbody>")]
+    out = []
+    for r in re.findall(r"<tr[^>]*>(.*?)</tr>", body, re.S):
+        m = re.search(r"viewBoard\((\d+)", r)
+        if not m:
+            continue
+        seq = int(m.group(1))
+        title = clean((re.search(r'<td class="subject">.*?<span>(.*?)</span>', r, re.S) or [None, ""])[1])
+        dept = clean((re.search(r'<td class="point-blue">(.*?)</td>', r, re.S) or [None, ""])[1])
+        state = clean((re.search(r'<span class="tag-d[^"]*">(.*?)</span>', r, re.S) or [None, ""])[1])
+        ds = re.findall(r"\d{4}-\d{2}-\d{2}", r)
+        posted = (re.findall(r"\d{4}\.\d{2}\.\d{2}", r) or [""])[0].replace(".", "-") or (ds[0] if ds else "")
+        new = seq > since_seq if since_seq else posted >= since_date
+        if not new or not title or "마감" in state or any(o["seq"] == seq for o in out):
+            continue
+        out.append({"seq": seq, "id": f"PTP_{seq}", "num": seq, "title": title,
+                    "period": " ~ ".join(ds[:2]), "state": state, "date": posted, "views": "0",
+                    "agency": dept, "field": "기타", "url": PTP_VIEW.format(seq=seq)})
+    for it in out:
+        try:
+            L = page_lines(fetch(it["url"]))
+            body = _body_after(L, r"^사업명$")
+            pairs = extract_pairs(body)
+            it.update({"target": pairs["target"], "support": pairs["support"], "intro": ""})
+        except Exception:
+            it.update({"target": "", "support": "", "intro": ""})
+        time.sleep(0.3)
+    return out
+
+
 def drop_tp_duplicates(biz, tp):
     """같은 공고가 기업마당과 테크노파크 양쪽에 있으면 기업마당 쪽을 뺀다 (TP 원문이 더 자세함)."""
     keys = [_norm_title(t["title"]) for t in tp]
@@ -343,6 +534,9 @@ TP_SOURCES = [
     ("btp", "부산테크노파크", "부산", btp_collect),
     ("utp", "울산테크노파크", "울산", utp_collect),
     ("gntp", "경남테크노파크", "경남", gntp_collect),
+    ("ttp", "대구테크노파크", "대구", ttp_collect),
+    ("gbtp", "경북테크노파크", "경북", gbtp_collect),
+    ("ptp", "포항테크노파크", "경북", ptp_collect),
 ]
 
 
