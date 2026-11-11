@@ -69,6 +69,7 @@ input[type=search]{flex:1;min-width:200px}
 .tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;background:#EEF2F7;color:var(--navy-2)}
 .tag.region.home{background:var(--orange-soft);color:#B4610F}
 .tag.new{background:#E7F6EE;color:var(--green)}
+.tag.tp{background:#EAF0FB;color:#2B4C8C}
 .dday{margin-left:auto;font-weight:800;font-size:14px;color:var(--muted)}
 .dday.hot{color:var(--red)}
 .card h3{margin:0 0 4px;font-size:17px;line-height:1.45;letter-spacing:-.3px}
@@ -176,7 +177,7 @@ footer a{color:#C9D3E3}
         <ul>
           <li>정부·지자체 지원사업 공고를 매일 아침 자동으로 모아 정리합니다.</li>
           <li>공고마다 <b>신청요건</b>과 <b>지원내용</b>을 뽑아 두어, 원문을 열기 전에 해당 여부를 빠르게 판단할 수 있습니다.</li>
-          <li>부산·울산·경남 공고는 따로 모아 보기 쉽게 표시합니다.</li>
+          <li>부산·울산·경남 공고는 따로 모아 보기 쉽게 표시하고, 부산테크노파크(btp.or.kr) 사업공고도 함께 모읍니다.</li>
         </ul>
       </div>
       <div class="panel">
@@ -192,7 +193,7 @@ footer a{color:#C9D3E3}
 
 <footer>
   <div class="wrap">
-    출처: <a href="https://www.bizinfo.go.kr" target="_blank" rel="noopener">기업마당 지원사업 공고 (bizinfo.go.kr)</a> · 매일 아침 자동 업데이트<br>
+    출처: <a href="https://www.bizinfo.go.kr" target="_blank" rel="noopener">기업마당 지원사업 공고 (bizinfo.go.kr)</a> · <a href="https://www.btp.or.kr/kor/CMS/Board/Board.do?mCode=MN013" target="_blank" rel="noopener">부산테크노파크 사업공고 (btp.or.kr)</a> · 매일 아침 자동 업데이트<br>
     © HelpR&amp;D · helprnd.com
   </div>
 </footer>
@@ -231,7 +232,7 @@ footer a{color:#C9D3E3}
     const regs = {};
     items.forEach(r => regs[r.region] = (regs[r.region]||0)+1);
     const others = Object.keys(regs).filter(r => r !== "전국" && !HOMES.includes(r)).sort();
-    chips($("regions"), [["전체","전체"],["동남권","부산·울산·경남","accent"],["전국","전국(중앙부처)"],
+    chips($("regions"), [["전체","전체"],["동남권","부산·울산·경남","accent"],["부산TP","부산테크노파크","accent"],["전국","전국(중앙부처)"],
       ...HOMES.map(r=>[r,r]), ...others.map(r=>[r,r])], "region");
     chips($("fields"), [["전체","전체"], ...FIELDS.map(f=>[f,f])], "field");
   }
@@ -240,7 +241,8 @@ footer a{color:#C9D3E3}
     const dd = dday(r).d;
     if(!st.showClosed && dd < 0) return false;
     if(st.region === "동남권" && !HOMES.includes(r.region)) return false;
-    if(st.region !== "전체" && st.region !== "동남권" && r.region !== st.region) return false;
+    if(st.region === "부산TP" && r.src !== "부산TP") return false;
+    if(!["전체","동남권","부산TP"].includes(st.region) && r.region !== st.region) return false;
     if(st.field !== "전체" && r.field !== st.field) return false;
     if(st.onlyNew && r.date !== latestDate) return false;
     if(st.onlyHot && !(dd >= 0 && dd <= 7)) return false;
@@ -260,6 +262,7 @@ footer a{color:#C9D3E3}
       <div class="meta">
         <span class="tag region ${home?"home":""}">${esc(r.region)}</span>
         <span class="tag">${esc(r.field)}</span>
+        ${r.src === "부산TP" ? '<span class="tag tp">부산테크노파크</span>' : ""}
         ${r.date === latestDate ? '<span class="tag new">NEW</span>' : ""}
         <span class="dday ${hot?"hot":""}">${dd.label}</span>
       </div>
@@ -272,7 +275,7 @@ footer a{color:#C9D3E3}
           <div><h4>지원내용</h4><p>${esc(r.support || "원문 공고에서 확인해 주세요.")}</p></div>
         </div>
         ${r.intro ? `<div class="intro">${esc(r.intro)}</div>` : ""}
-        <a class="go" href="${esc(r.url)}" target="_blank" rel="noopener">기업마당 원문 공고 보기 →</a>
+        <a class="go" href="${esc(r.url)}" target="_blank" rel="noopener">${r.src === "부산TP" ? "부산테크노파크" : "기업마당"} 원문 공고 보기 →</a>
       </details>
     </article>`;
   }
@@ -280,8 +283,8 @@ footer a{color:#C9D3E3}
   function render(){
     let rows = items.filter(match);
     if(st.sort === "deadline"){
-      rows.sort((a,b) => { const x=dday(a).d, y=dday(b).d; return (x<0?99999:x)-(y<0?99999:y) || b.num-a.num; });
-    } else rows.sort((a,b) => b.num - a.num);
+      rows.sort((a,b) => { const x=dday(a).d, y=dday(b).d; return (x<0?99999:x)-(y<0?99999:y) || b.date.localeCompare(a.date); });
+    } else rows.sort((a,b) => b.date.localeCompare(a.date) || (a.src === b.src ? b.num - a.num : 0));
     $("count").textContent = rows.length.toLocaleString();
     $("list").innerHTML = rows.length ? rows.slice(0, shown).map(card).join("")
       : '<div class="empty">조건에 맞는 공고가 없어요. 필터를 바꿔 보세요.</div>';
@@ -311,7 +314,7 @@ footer a{color:#C9D3E3}
 
   fetch("data/briefings.json", {cache:"no-cache"}).then(r => r.json()).then(list => {
     $("briefs").innerHTML = list.map(b => `<a class="b" href="${encodeURI(b.ppt)}" download>
-      <span><span class="d">${b.date}</span><br><span class="c">새 공고 ${b.count}건 · 부울경 ${Object.values(b.regions||{}).reduce((a,c)=>a+c,0)}건</span></span>
+      <span><span class="d">${b.date}</span><br><span class="c">새 공고 ${b.count}건 · 부울경 ${Object.values(b.regions||{}).reduce((a,c)=>a+c,0)}건${b.btp ? " · 부산TP " + b.btp + "건" : ""}</span></span>
       <span class="dl">PPT 받기 ↓</span></a>`).join("") || '<div class="empty">아직 브리핑 자료가 없어요.</div>';
   }).catch(() => {});
 })();

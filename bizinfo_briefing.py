@@ -123,13 +123,87 @@ def parse_detail(page_html):
 
 def add_details(items):
     for it in items:
-        if "target" in it:  # 이미 가져온 공고
+        if "target" in it:  # 이미 가져온 공고 (부산테크노파크 등)
             continue
         try:
             it.update(parse_detail(fetch(DETAIL.format(id=it["id"]))))
         except Exception:
             it.update({"intro": "", "target": "", "support": ""})
         time.sleep(0.3)
+
+
+def link_of(it):
+    return it.get("url") or DETAIL.format(id=it["id"])
+
+
+# ---------------- 부산테크노파크(BTP) 사업공고 ----------------
+BTP_BASE = "https://www.btp.or.kr/kor/CMS/Board/Board.do"
+BTP_LIST = BTP_BASE + "?mCode=MN013&page={page}"
+BTP_VIEW = BTP_BASE + "?mCode=MN013&mode=view&mgr_seq=16&board_seq={seq}"
+BTP_FIELD = {"창업": "창업", "입주": "창업", "수출": "수출", "해외": "수출", "R&D": "기술", "기술": "기술",
+             "인증": "기술", "인력": "인력", "채용": "인력", "교육": "인력", "자금": "금융", "금융": "금융",
+             "판로": "내수", "전시회": "내수", "마케팅": "내수", "컨설팅": "경영", "경영": "경영"}
+
+
+def _strip_label(t):
+    """'모 집 대 상 예비창업자…' 처럼 한 글자씩 띄운 소제목을 떼어낸다."""
+    return re.sub(r"^(?:\S ){2,}\S\s+", "", t).strip()
+
+
+def btp_parse_list(page_html):
+    body = re.search(r"<tbody>(.*?)</tbody>", page_html, re.S)
+    out = []
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", body.group(1) if body else "", re.S):
+        m = re.search(r"board_seq=(\d+)", tr)
+        title = re.search(r'class="titleHover">(.*?)</span>', tr, re.S)
+        if not m or not title:
+            continue
+        cell = lambda c: clean((re.search(rf'<td class="{c}">(.*?)</td>', tr, re.S) or [None, ""])[1])
+        period = re.sub(r"접수기간 :|D-\d+|D-DAY", "", cell("period"))
+        period = " ~ ".join(d.replace(".", "-") for d in re.findall(r"\d{4}\.\d{2}\.\d{2}", period)) or clean(period)
+        out.append({"seq": int(m.group(1)), "id": f"BTP_{m.group(1)}", "num": int(m.group(1)),
+                    "title": clean(title.group(1)), "period": period, "state": cell("state"),
+                    "date": cell("date").replace(".", "-"), "views": re.sub(r"\D", "", cell("cnt")) or "0",
+                    "org": "부산테크노파크", "agency": "", "field": "기타",
+                    "url": BTP_VIEW.format(seq=m.group(1)), "source": "btp"})
+    return out
+
+
+def btp_parse_detail(page_html):
+    info = {}
+    for li in re.findall(r"<li[^>]*>\s*<span class=\"tit[^\"]*\">(.*?)</span>(.*?)</li>", page_html, re.S):
+        key = re.sub(r"\s+", "", clean(li[0]))
+        val = re.sub(r"<br\s*/?>", "\n", li[1])
+        lines = [_strip_label(clean(x)) for x in val.split("\n")]
+        info[key] = "\n".join(l for l in lines if l)
+    field = re.search(r'지원분야 : </span>(.*?)</li>', page_html)
+    intro = re.search(r'<div class="txt-box">(.*?)</div>', page_html, re.S)
+    f = clean(field.group(1)) if field else ""
+    return {"target": info.get("지원대상", ""), "support": info.get("지원내용", ""),
+            "intro": clean(intro.group(1)) if intro else "",
+            "field": f}
+
+
+def btp_collect(since_seq, since_date, max_pages=5):
+    out = []
+    for page in range(1, max_pages + 1):
+        rows = btp_parse_list(fetch(BTP_LIST.format(page=page)))
+        if not rows:
+            break
+        new = [r for r in rows if (r["seq"] > since_seq if since_seq else r["date"] >= since_date)]
+        out += new
+        if len(new) < len(rows):
+            break
+        time.sleep(0.5)
+    for it in out:
+        try:
+            it.update(btp_parse_detail(fetch(it["url"])))
+        except Exception:
+            it.update({"target": "", "support": "", "intro": "", "field": ""})
+        # 지원분야가 '기타'면 공고 제목으로 분야를 짐작한다
+        it["field"] = next((v for k, v in BTP_FIELD.items() if k in it.get("field", "")), None)             or next((v for k, v in BTP_FIELD.items() if k in it["title"]), "기타")
+        time.sleep(0.3)
+    return out
 
 
 # ---------------- 분류 ----------------
@@ -226,7 +300,7 @@ def table_slide(prs, title, sub, rows, today, foot):
         urgent = 0 <= d <= 7
         org = it["org"] if it["agency"] in ("", it["org"]) else f'{it["org"]} · {it["agency"]}'
         set_cell(t.cell(i, 0), it["field"], 10, True, ORANGE, fill, align=PP_ALIGN.CENTER)
-        set_cell(t.cell(i, 1), it["title"], 11, False, INK, fill, link=DETAIL.format(id=it["id"]))
+        set_cell(t.cell(i, 1), it["title"], 11, False, INK, fill, link=link_of(it))
         set_cell(t.cell(i, 2), it["period"], 10, False, MUTED, fill, align=PP_ALIGN.CENTER)
         set_cell(t.cell(i, 3), org, 10, False, MUTED, fill)
         set_cell(t.cell(i, 4), label, 10, urgent, RED if urgent else MUTED, fill, align=PP_ALIGN.CENTER)
@@ -251,8 +325,8 @@ def detail_slides(prs, title, rows, today, foot):
             urgent = 0 <= d <= 7
             org = it["org"] if it["agency"] in ("", it["org"]) else f'{it["org"]} · {it["agency"]}'
             # 제목줄
-            t = tb(s, Inches(0.65), y + Inches(0.12), Inches(10.6), Inches(0.45), shorten(it["title"], 70), 15, True, NAVY)
-            t.text_frame.paragraphs[0].runs[0].hyperlink.address = DETAIL.format(id=it["id"])
+            t = tb(s, Inches(0.65), y + Inches(0.12), Inches(10.6), Inches(0.45), shorten(it["title"], 56), 15, True, NAVY)
+            t.text_frame.paragraphs[0].runs[0].hyperlink.address = link_of(it)
             tb(s, Inches(11.2), y + Inches(0.12), Inches(1.5), Inches(0.45), label, 14, True,
                RED if urgent else ORANGE, PP_ALIGN.RIGHT)
             tb(s, Inches(0.65), y + Inches(0.55), Inches(12), Inches(0.3),
@@ -267,7 +341,8 @@ def detail_slides(prs, title, rows, today, foot):
         footer(prs, s, foot)
 
 
-def build(items, today, since_label, out_path):
+def build(items, today, since_label, out_path, btp=None):
+    btp = btp or []
     prs = Presentation()
     prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
 
@@ -281,9 +356,9 @@ def build(items, today, since_label, out_path):
         by_region[region_of(i)] = by_region.get(region_of(i), 0) + 1
     def sort_key(i):
         return (dday(i["period"], today)[1] if dday(i["period"], today)[1] >= 0 else 998,)
-    urgent = sorted([i for i in home + national if 0 <= dday(i["period"], today)[1] <= 7], key=sort_key)
+    urgent = sorted([i for i in home + national + btp if 0 <= dday(i["period"], today)[1] <= 7], key=sort_key)
     stamp = today.strftime("%Y년 %m월 %d일") + " " + "월화수목금토일"[today.weekday()] + "요일"
-    foot = f"출처: 기업마당 지원사업 공고 (bizinfo.go.kr) · {since_label} 등록분 · 신청 전 원문 공고를 꼭 확인하세요"
+    foot = f"출처: 기업마당(bizinfo.go.kr)" + (" · 부산테크노파크(btp.or.kr)" if btp else "") + f" · {since_label} 등록분 · 신청 전 원문 공고를 꼭 확인하세요"
 
     # 1. 표지
     s = prs.slides.add_slide(prs.slide_layouts[6])
@@ -294,16 +369,16 @@ def build(items, today, since_label, out_path):
     acc = s.shapes.add_shape(1, Inches(0.8), Inches(3.15), Inches(1.6), Inches(0.08))
     acc.fill.solid(); acc.fill.fore_color.rgb = ORANGE; acc.line.fill.background()
     stats = ([("새 공고", len(items), WHITE)] + [(r, len(by_home[r]), ORANGE) for r in HOMES]
-             + [("전국(중앙부처)", len(national), WHITE), ("7일 내 마감", len(urgent), WHITE)])
+             + [("부산TP", len(btp), ORANGE), ("전국", len(national), WHITE), ("7일 내 마감", len(urgent), WHITE)])
     step = 11.7 / len(stats)
     for k, (label, n, color) in enumerate(stats):
         x = Inches(0.8 + k * step)
-        tb(s, x, Inches(3.8), Inches(step - 0.2), Inches(1.0), str(n), 54, True, color)
+        tb(s, x, Inches(3.8), Inches(step - 0.2), Inches(1.0), str(n), 48, True, color)
         tb(s, x, Inches(4.9), Inches(step - 0.2), Inches(0.4), label, 16, False, RGBColor(0xC9, 0xD3, 0xE3))
-    tb(s, Inches(0.8), Inches(6.5), Inches(11.5), Inches(0.4), f"helprnd.com · {since_label} 기업마당에 올라온 공고", 12, False,
+    tb(s, Inches(0.8), Inches(6.5), Inches(11.5), Inches(0.4), f"helprnd.com · {since_label} 기업마당·부산테크노파크에 올라온 공고", 12, False,
        RGBColor(0x9F, 0xAE, 0xC6))
 
-    if not items:
+    if not items and not btp:
         s2 = prs.slides.add_slide(prs.slide_layouts[6])
         header(prs, s2, "새로 올라온 공고가 없어요", stamp)
         tb(s2, Inches(0.8), Inches(2.0), Inches(11), Inches(1), "지난 브리핑 이후 기업마당에 새 지원사업 공고가 없습니다.", 20)
@@ -350,6 +425,8 @@ def build(items, today, since_label, out_path):
             lines.append(f"• {r} 공고: 새로 올라온 것 없음")
     if urgent:
         lines.append(f"• 7일 안에 마감되는 공고 {len(urgent)}건 (다음 장)")
+    if btp:
+        lines.append(f"• 부산테크노파크 새 공고 {len(btp)}건 (따로 정리)")
     top = sorted(national, key=lambda i: -int(re.sub(r'\D', '', i['views']) or 0))[:3]
     for i in top:
         lines.append(f"• 조회 많은 전국 공고: {i['title'][:38]}{'…' if len(i['title']) > 38 else ''}")
@@ -382,6 +459,14 @@ def build(items, today, since_label, out_path):
             table_slide(prs, f"{r} 공고", f"{len(rows)}건" + (f" · {k // 10 + 1}쪽" if len(rows) > 10 else ""),
                         rows_sorted[k:k + 10], today, foot)
         detail_slides(prs, f"{r} 공고 · 신청요건과 지원내용", rows_sorted, today, foot)
+
+    # 4-1. 부산테크노파크 사업공고 (btp.or.kr 직접 수집)
+    if btp:
+        btp_sorted = sorted(btp, key=sort_key)
+        for k in range(0, len(btp_sorted), 10):
+            table_slide(prs, "부산테크노파크 공고", f"{len(btp)}건" + (f" · {k // 10 + 1}쪽" if len(btp) > 10 else ""),
+                        btp_sorted[k:k + 10], today, foot)
+        detail_slides(prs, "부산테크노파크 공고 · 신청요건과 지원내용", btp_sorted, today, foot)
 
     # 5. 전국(중앙부처) — 분야별
     nat_sorted = sorted(national, key=lambda i: (FIELD_ORDER.index(i["field"]) if i["field"] in FIELD_ORDER else 9))
@@ -431,7 +516,7 @@ def build(items, today, since_label, out_path):
             hot = 0 <= d <= 7
             set_cell(t.cell(i, 0), reg, 9.5, mine, ORANGE if mine else INK, fill, align=PP_ALIGN.CENTER)
             set_cell(t.cell(i, 1), it["field"], 9.5, False, MUTED, fill, align=PP_ALIGN.CENTER)
-            set_cell(t.cell(i, 2), shorten(it["title"], 62), 9.5, False, INK, fill, link=DETAIL.format(id=it["id"]))
+            set_cell(t.cell(i, 2), shorten(it["title"], 62), 9.5, False, INK, fill, link=link_of(it))
             set_cell(t.cell(i, 3), shorten(it["org"], 14), 9.5, False, MUTED, fill)
             set_cell(t.cell(i, 4), label, 9.5, hot, RED if hot else MUTED, fill, align=PP_ALIGN.CENTER)
         footer(prs, s, foot)
@@ -439,6 +524,7 @@ def build(items, today, since_label, out_path):
     prs.save(out_path)
     summary = {"total": len(items)}
     summary.update({r: len(by_home[r]) for r in HOMES})
+    summary.update({"btp": len(btp), "btp_titles": [i["title"] for i in sorted(btp, key=sort_key)][:3]})
     summary.update({"national": len(national), "others": len(others), "urgent": len(urgent),
                     "home_titles": {r: [i["title"] for i in by_home[r]][:3] for r in HOMES}})
     return summary
@@ -464,8 +550,19 @@ def main():
     else:
         since_label = f"{since_date} 이후"
 
+    # 부산테크노파크: 처음이면 최근 7일, 그다음부터는 지난번 이후 새 글만
+    btp_seq = state.get("btp_last_seq", 0)
+    try:
+        btp = btp_collect(btp_seq, (today - dt.timedelta(days=7)).isoformat())
+        btp = [b for b in btp if "마감" not in b.get("state", "")]
+    except Exception as e:
+        print(f"[warn] 부산테크노파크 수집 실패: {e}", file=sys.stderr)
+        btp = None
+
     out_path = out_dir / f"{today.isoformat()}_지원사업공고.pptx"
-    summary = build(items, today, since_label, out_path)
+    summary = build(items, today, since_label, out_path, btp)
+    if btp:
+        state["btp_last_seq"] = max(b["seq"] for b in btp)
     if items:
         state["last_num"] = max(i["num"] for i in items)
     elif not since_num:
