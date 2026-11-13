@@ -1,9 +1,9 @@
 {
-  "last_num": 127900,
-  "last_run": "2026-11-13",
-  "btp_last_seq": 9582673,
+  "last_num": 127929,
+  "last_run": "2026-11-14",
+  "btp_last_seq": 9582680,
   "utp_last_seq": 613,
   "gntp_last_seq": 3864,
-  "ttp_last_seq": 15868,
+  "ttp_last_seq": 15870,
   "ptp_last_seq": 8230
 }
