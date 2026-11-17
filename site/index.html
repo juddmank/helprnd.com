@@ -102,6 +102,42 @@ details[open] summary::before{content:"▾ "}
 .about .panel{padding:20px}
 .about ul{margin:6px 0 0;padding-left:18px}
 
+
+/* consult (상담 신청) */
+.cta{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--orange);color:#fff;
+  font:inherit;font-weight:800;font-size:15px;padding:11px 20px;cursor:pointer;text-decoration:none;box-shadow:0 4px 14px rgba(242,140,40,.35)}
+.cta:hover{filter:brightness(1.05)}
+.cta.sm{font-size:13px;padding:7px 14px;box-shadow:none;margin-left:18px}
+.hero .cta{margin-top:18px}
+.consult-band{margin-top:22px;background:var(--navy);color:#fff;border-radius:var(--radius);padding:22px 24px;display:flex;
+  align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.consult-band b{font-size:18px}
+.consult-band p{margin:4px 0 0;color:#C9D3E3;font-size:14px}
+.modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(15,27,46,.55)}
+.modal.open{display:flex}
+.dialog{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:calc(100vh - 32px);overflow:auto;padding:24px 22px 20px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.dialog h3{margin:0 0 4px;font-size:21px;letter-spacing:-.5px}
+.dialog .lead{margin:0 0 16px;color:var(--muted);font-size:14px}
+.dialog .x{position:absolute;top:10px;right:12px;border:0;background:none;font-size:24px;line-height:1;color:var(--muted);cursor:pointer;padding:6px}
+.f{display:block;margin-bottom:10px}
+.f span{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.f span i{color:var(--red);font-style:normal}
+.f input,.f textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);background:#fff}
+.f input:focus,.f textarea:focus{outline:2px solid #FBD3A8;border-color:var(--orange)}
+.f textarea{min-height:72px;resize:vertical}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.consent{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--muted);margin:6px 0 10px}
+.consent table{width:100%;border-collapse:collapse;margin:6px 0}
+.consent th{text-align:left;font-weight:700;color:var(--ink);padding:2px 8px 2px 0;white-space:nowrap;vertical-align:top}
+.consent td{padding:2px 0}
+.agree{display:flex;gap:8px;align-items:flex-start;font-size:14px;font-weight:700;margin:4px 0 14px;cursor:pointer}
+.agree input{width:18px;height:18px;margin-top:2px;accent-color:var(--orange);flex:none}
+.dialog .cta{width:100%;justify-content:center}
+.dialog .cta[disabled]{opacity:.6;cursor:wait}
+.msg{margin:10px 0 0;font-size:14px;font-weight:700;min-height:20px}
+.msg.err{color:var(--red)} .msg.ok{color:var(--green)}
+.done{text-align:center;padding:16px 4px 6px}
+.done .big{font-size:40px}
 footer{margin-top:30px;background:#0F1B2E;color:#9FAEC6;font-size:13px;padding:26px 0}
 footer a{color:#C9D3E3}
 
@@ -112,15 +148,17 @@ footer a{color:#C9D3E3}
   .stats{grid-template-columns:repeat(2,1fr)}
   .cols,.about{grid-template-columns:1fr}
   .row .lab{width:100%}
+  .cta.sm{margin-left:10px}
 }
-@media (max-width:420px){nav a:not(:first-child){display:none}}
+@media (max-width:420px){nav a{display:none}}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
     <a class="logo" href="#"><span class="mark">H</span>Help<b>R&amp;D</b></a>
-    <nav><a href="#find">공고 찾기</a><a href="#brief">브리핑 자료</a><a href="#about">안내</a></nav>
+    <div style="display:flex;align-items:center"><nav><a href="#find">공고 찾기</a><a href="#brief">브리핑 자료</a><a href="#about">안내</a></nav>
+    <button class="cta sm" data-consult hidden>무료 상담</button></div>
   </div>
 </header>
 
@@ -128,6 +166,7 @@ footer a{color:#C9D3E3}
   <div class="wrap">
     <h1>오늘 올라온 <em>정부지원사업</em>,<br>한눈에 보세요</h1>
     <p>기업마당에 매일 올라오는 중소기업·소상공인·개인사업자 지원사업 공고를 매일 아침 정리합니다.</p>
+    <button class="cta" data-consult hidden>우리 회사에 맞는 지원사업 무료 상담 →</button>
   </div>
 </div>
 
@@ -167,6 +206,11 @@ footer a{color:#C9D3E3}
     <div class="resultbar"><span><strong id="count">0</strong>건</span><span id="updated"></span></div>
     <div class="list" id="list"></div>
     <button class="chip more" id="more" hidden>더 보기</button>
+    <div class="consult-band" data-consult-band hidden>
+      <div><b>어떤 공고가 우리 회사에 맞는지 모르겠다면</b>
+        <p>회사 정보를 남겨 주시면 맞는 지원사업을 골라 연락드립니다. 상담은 무료입니다.</p></div>
+      <button class="cta" data-consult>무료 상담 신청</button>
+    </div>
   </section>
 
   <section id="brief">
@@ -199,9 +243,115 @@ footer a{color:#C9D3E3}
 <footer>
   <div class="wrap">
     출처: <a href="https://www.bizinfo.go.kr" target="_blank" rel="noopener">기업마당 지원사업 공고 (bizinfo.go.kr)</a> · 지역 테크노파크 (<a href="https://www.btp.or.kr/kor/CMS/Board/Board.do?mCode=MN013" target="_blank" rel="noopener">부산</a> · <a href="https://www.utp.or.kr/include/contents.php?mnuno=M0000018&menu_group=1&sno=0102" target="_blank" rel="noopener">울산</a> · <a href="https://www.gntp.or.kr/biz/apply" target="_blank" rel="noopener">경남</a> · <a href="https://www.ttp.org/bbs/BoardControll.do?bbsId=BBSMSTR_000000000003" target="_blank" rel="noopener">대구</a> · <a href="https://www.gbtp.or.kr/user/board.do?bbsId=BBSMSTR_000000000021" target="_blank" rel="noopener">경북</a> · <a href="https://www.ptp.or.kr/main/board/index.do?menu_idx=116&manage_idx=15" target="_blank" rel="noopener">포항</a>) · 매일 아침 자동 업데이트<br>
-    © HelpR&amp;D · helprnd.com
+    © HelpR&amp;D · helprnd.com · <a href="privacy.html"><b>개인정보처리방침</b></a>
   </div>
 </footer>
+
+<div class="modal" id="consult" role="dialog" aria-modal="true" aria-labelledby="consult-title">
+  <div class="dialog">
+    <button class="x" type="button" data-close aria-label="닫기">×</button>
+    <form id="consult-form" novalidate>
+      <h3 id="consult-title">지원사업 무료 상담 신청</h3>
+      <p class="lead">우리 회사에 맞는 지원사업을 골라 연락드립니다.</p>
+      <label class="f"><span>회사명 <i>*</i></span><input name="company" maxlength="60" autocomplete="organization" required></label>
+      <label class="f"><span>담당자 이름 <i>*</i></span><input name="name" maxlength="30" autocomplete="name" required></label>
+      <label class="f"><span>전화번호 <i>*</i></span><input name="phone" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required></label>
+      <label class="f"><span>이메일 <i>*</i></span><input name="email" type="email" maxlength="80" autocomplete="email" placeholder="name@company.com" required></label>
+      <label class="f"><span>궁금한 점 (선택)</span><textarea name="message" maxlength="1000" placeholder="예: 업종, 지역, 관심 분야(수출·R&D·채용 등)"></textarea></label>
+      <label class="hp" aria-hidden="true">웹사이트<input name="website" tabindex="-1" autocomplete="off"></label>
+      <div class="consent">
+        <b style="color:var(--ink)">개인정보 수집·이용 안내</b>
+        <table>
+          <tr><th>목적</th><td>지원사업 상담 및 맞춤 공고 안내 연락</td></tr>
+          <tr><th>항목</th><td>회사명, 담당자 이름, 전화번호, 이메일, 문의내용(선택)</td></tr>
+          <tr><th>보유기간</th><td>상담 종료 후 1년 (삭제 요청 시 즉시 파기)</td></tr>
+        </table>
+        동의를 거부할 수 있으며, 거부하시면 상담 신청이 어렵습니다. 자세한 내용은 <a href="privacy.html" target="_blank">개인정보처리방침</a>을 확인하세요.
+      </div>
+      <label class="agree"><input type="checkbox" name="consent"> 개인정보 수집·이용에 동의합니다. (필수)</label>
+      <button class="cta" type="submit">상담 신청하기</button>
+      <p class="msg" id="consult-msg" role="status"></p>
+    </form>
+    <div class="done" id="consult-done" hidden>
+      <div class="big">✅</div>
+      <h3>신청이 접수되었습니다</h3>
+      <p class="lead">확인 후 남겨 주신 연락처로 연락드리겠습니다.</p>
+      <button class="cta" type="button" data-close>닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 상담 신청 팝업: 입력 내용은 Supabase 함수(lead)를 거쳐 DB에 저장되고 Resend로 알림 메일이 간다 */
+(function(){
+  const LEAD_ENDPOINT = "https://lqcdnzrsviivkajntmqs.supabase.co/functions/v1/lead";  // 비우면 상담 버튼·팝업을 숨김
+  const AUTO_OPEN_SEC = 20;            // 첫 방문 후 자동으로 띄우기까지 초
+  const SNOOZE_DAYS = 7;               // 닫으면 며칠 동안 자동으로 다시 안 띄움
+  if(!LEAD_ENDPOINT) return;
+
+  const modal = document.getElementById("consult");
+  const form = document.getElementById("consult-form");
+  const msg = document.getElementById("consult-msg");
+  const KEY = "helprnd_consult";
+  const get = () => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){ return {}; } };
+  const set = v => { try { localStorage.setItem(KEY, JSON.stringify(Object.assign(get(), v))); } catch(e){} };
+  let lastFocus = null;
+
+  document.querySelectorAll("[data-consult],[data-consult-band]").forEach(el => el.hidden = false);
+  document.querySelectorAll("[data-consult]").forEach(b => b.addEventListener("click", () => open("button")));
+  modal.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", close));
+  modal.addEventListener("click", e => { if(e.target === modal) close(); });
+  document.addEventListener("keydown", e => { if(e.key === "Escape" && modal.classList.contains("open")) close(); });
+
+  function open(){
+    lastFocus = document.activeElement;
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => (form.hidden ? modal.querySelector(".done .cta") : form.company).focus(), 30);
+  }
+  function close(){
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+    set({ snoozeUntil: Date.now() + SNOOZE_DAYS * 864e5 });
+    if(lastFocus) lastFocus.focus();
+  }
+
+  // 자동으로 한 번 띄우기 (신청했거나 최근에 닫았으면 안 띄움)
+  const st = get();
+  if(!st.done && !(st.snoozeUntil > Date.now())){
+    setTimeout(() => { if(!modal.classList.contains("open")) open("auto"); }, AUTO_OPEN_SEC * 1000);
+  }
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(form).entries());
+    d.consent = form.consent.checked;
+    d.page = location.href;
+    const need = [["company","회사명을"],["name","담당자 이름을"],["phone","전화번호를"],["email","이메일을"]];
+    const miss = need.find(([k]) => !String(d[k] || "").trim());
+    if(miss){ return fail(miss[1] + " 입력해 주세요.", form[miss[0]]); }
+    if(!/^[0-9\-+ ]{8,20}$/.test(d.phone.trim())) return fail("전화번호를 확인해 주세요.", form.phone);
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim())) return fail("이메일 형식을 확인해 주세요.", form.email);
+    if(!d.consent) return fail("개인정보 수집·이용에 동의해 주세요.", form.consent);
+
+    const btn = form.querySelector("button[type=submit]");
+    btn.disabled = true; btn.textContent = "보내는 중…"; msg.textContent = ""; msg.className = "msg";
+    try{
+      const res = await fetch(LEAD_ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(d) });
+      const r = await res.json();
+      if(!r.ok) throw new Error(r.message || "전송 실패");
+      form.hidden = true; document.getElementById("consult-done").hidden = false;
+      set({ done: true });
+      modal.querySelector(".done .cta").focus();
+    }catch(err){
+      fail((err && err.message && !/fetch|network/i.test(err.message)) ? err.message : "전송하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    }finally{
+      btn.disabled = false; btn.textContent = "상담 신청하기";
+    }
+  });
+  function fail(t, el){ msg.textContent = t; msg.className = "msg err"; if(el) el.focus(); }
+})();
+</script>
 
 <script>
 (function(){
