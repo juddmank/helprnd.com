@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HelpR&amp;D · 정부지원사업 무료 상담</title>
+<meta name="description" content="우리 회사에 맞는 정부지원사업을 골라 드립니다. 부산·울산·경남 중소기업·소상공인·개인사업자를 위한 지원사업 무료 상담.">
+<meta property="og:title" content="HelpR&D · 정부지원사업 무료 상담">
+<meta property="og:description" content="매일 올라오는 지원사업 중 우리 회사에 맞는 것만 골라 드립니다. 상담은 무료입니다.">
+<meta property="og:url" content="https://helprnd.com/consult.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314243D'/%3E%3Cpath d='M9 23V9h4v5h6V9h4v14h-4v-5h-6v5z' fill='%23F28C28'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --navy:#14243D; --navy-2:#1F3557; --orange:#F28C28; --orange-soft:#FFF3E6;
+  --ink:#1E2633; --muted:#667085; --line:#E4E7EC; --bg:#F5F7FA; --card:#FFFFFF;
+  --red:#D64545; --green:#1F8A5B; --radius:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#fff;color:var(--ink);font-family:Pretendard,"Malgun Gothic",system-ui,sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+section{padding:72px 0}
+.eyebrow{display:inline-block;font-size:13px;font-weight:800;color:#B4610F;background:var(--orange-soft);border-radius:999px;padding:4px 12px;margin-bottom:12px}
+h2{font-size:32px;line-height:1.3;letter-spacing:-.8px;margin:0 0 12px}
+.sub{color:var(--muted);font-size:17px;margin:0 0 32px}
+
+/* header */
+header.top{position:sticky;top:0;z-index:20;background:rgba(20,36,61,.96);backdrop-filter:blur(6px)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:#fff;letter-spacing:-.3px}
+.logo b{color:var(--orange)}
+.logo .mark{width:28px;height:28px;border-radius:7px;background:var(--orange);display:grid;place-items:center;color:var(--navy);font-size:15px;font-weight:900}
+.top nav{display:flex;align-items:center;gap:20px}
+.top nav a{color:#C9D3E3;text-decoration:none;font-size:14px;font-weight:600}
+.top nav a:hover{color:#fff}
+.top .cta{font-size:14px;padding:8px 16px;box-shadow:none}
+
+/* hero */
+.hero{background:radial-gradient(1200px 500px at 85% -10%,#2D4A78 0%,transparent 60%),linear-gradient(180deg,var(--navy),var(--navy-2));color:#fff;padding:84px 0 96px}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+.hero h1{font-size:46px;line-height:1.22;letter-spacing:-1.4px;margin:0 0 18px;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero p{color:#C9D3E3;font-size:18px;margin:0 0 28px}
+.hero .cta{font-size:17px;padding:14px 26px}
+.hero .note{display:block;margin-top:12px;font-size:13px;color:#9FAEC6}
+.live{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:22px}
+.live h3{margin:0 0 4px;font-size:15px;color:#C9D3E3;font-weight:700}
+.live .upd{font-size:12px;color:#9FAEC6;margin-bottom:14px}
+.live .g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.live .s{background:rgba(255,255,255,.07);border-radius:14px;padding:14px 16px}
+.live .n{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.2}
+.live .n.o{color:var(--orange)} .live .n.r{color:#FF8A8A}
+.live .l{font-size:13px;color:#C9D3E3}
+
+/* pain */
+.pain{background:var(--bg)}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.card .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--orange-soft);margin-bottom:14px}
+.card h3{margin:0 0 6px;font-size:19px;letter-spacing:-.4px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+
+/* service */
+.cards4{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.svc{display:flex;gap:16px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.svc .num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800;display:grid;place-items:center}
+.svc h3{margin:0 0 4px;font-size:18px}
+.svc p{margin:0;color:var(--muted);font-size:15px}
+
+/* steps */
+.steps{background:var(--navy);color:#fff}
+.steps h2{color:#fff} .steps .sub{color:#C9D3E3}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:s}
+.flow li{list-style:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:20px;position:relative}
+.flow li::before{counter-increment:s;content:"STEP " counter(s);font-size:12px;font-weight:800;color:var(--orange);letter-spacing:.5px}
+.flow b{display:block;font-size:18px;margin:6px 0 4px}
+.flow span{color:#C9D3E3;font-size:14px}
+.flow{padding:0;margin:0}
+
+/* now */
+.now{background:var(--bg)}
+.list{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ann{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;text-decoration:none}
+.ann:hover{border-color:var(--orange)}
+.ann .meta{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:700}
+.tag{padding:2px 8px;border-radius:6px;background:#EEF2F7;color:var(--navy-2)}
+.tag.h{background:var(--orange-soft);color:#B4610F}
+.dd{margin-left:auto;color:var(--muted)} .dd.hot{color:var(--red)}
+.ann h4{margin:0;font-size:15px;line-height:1.45;letter-spacing:-.2px}
+.ann p{margin:0;font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.more{margin-top:20px;text-align:center}
+.more a{font-weight:700;color:var(--navy-2)}
+
+/* faq */
+details{border-bottom:1px solid var(--line);padding:18px 4px}
+summary{cursor:pointer;font-weight:700;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--orange);font-size:22px;line-height:1}
+details[open] summary::after{content:"−"}
+details p{margin:10px 0 0;color:var(--muted)}
+
+/* final */
+.final{background:linear-gradient(135deg,var(--orange),#E5731A);color:#fff;text-align:center}
+.final h2{color:#fff;font-size:34px}
+.final p{font-size:17px;margin:0 0 26px;opacity:.95}
+.final .cta{background:var(--navy);font-size:17px;padding:14px 28px;box-shadow:0 6px 18px rgba(20,36,61,.35)}
+
+footer{background:#0F1B2E;color:#9FAEC6;font-size:13px;padding:26px 0}
+footer a{color:#C9D3E3}
+
+/* mobile sticky CTA */
+.mcta{display:none}
+
+@media (max-width:860px){
+  section{padding:56px 0}
+  h2{font-size:26px}
+  .hero{padding:56px 0 64px}
+  .hero .wrap{grid-template-columns:1fr}
+  .hero h1{font-size:33px}
+  .cards3,.cards4,.flow,.list{grid-template-columns:1fr}
+  .top nav a{display:none}
+  .mcta{display:block;position:fixed;left:12px;right:12px;bottom:12px;z-index:30}
+  .mcta .cta{width:100%;justify-content:center;font-size:16px;padding:14px}
+  body{padding-bottom:76px}
+}
+</style>
+<link rel="stylesheet" href="consult.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="./"><span class="mark">H</span><span>Help<b>R&amp;D</b></span></a>
+    <nav><a href="./">공고 찾기</a><a href="#how">진행 방법</a><a href="#faq">자주 묻는 질문</a><button class="cta" data-consult>무료 상담</button></nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <h1>정부지원사업,<br><em>혼자 찾고 혼자 쓰지</em> 마세요</h1>
+      <p>매일 수십 건씩 올라오는 공고 중에서 <b style="color:#fff">우리 회사에 맞는 사업</b>만 골라, 신청 준비까지 함께합니다.</p>
+      <button class="cta" data-consult>우리 회사 맞춤 무료 상담 받기 →</button>
+      <span class="note">상담은 무료 · 1분이면 신청 끝 · 부산·울산·경남 중소기업·소상공인·개인사업자</span>
+    </div>
+    <div class="live" aria-live="polite">
+      <h3>지금 helprnd.com에 모인 공고</h3>
+      <div class="upd" id="upd">불러오는 중…</div>
+      <div class="g">
+        <div class="s"><div class="n" id="n-open">-</div><div class="l">신청 가능한 공고</div></div>
+        <div class="s"><div class="n o" id="n-home">-</div><div class="l">부산·울산·경남</div></div>
+        <div class="s"><div class="n r" id="n-hot">-</div><div class="l">7일 안에 마감</div></div>
+        <div class="s"><div class="n" id="n-tp">-</div><div class="l">테크노파크 공고</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="pain">
+  <div class="wrap">
+    <span class="eyebrow">이런 고민 있으시죠</span>
+    <h2>지원사업, 알고는 있는데 손이 안 갑니다</h2>
+    <p class="sub">대부분의 사장님이 같은 이유로 지원사업을 놓칩니다.</p>
+    <div class="cards3">
+      <div class="card">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F28C28" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+        <h3>공고가 너무 많아요</h3>
+        <p>기업마당, 테크노파크, 지자체까지 하루에도 수십 건. 다 읽어볼 시간이 없습니다.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F28C28" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.5V14M12 17.5v.01"/></svg></div>
+        <h3>우리 회사가 되는지 모르겠어요</h3>
+        <p>업종·지역·업력·매출 조건이 공고마다 달라서 해당되는지 판단하기 어렵습니다.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F28C28" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></div>
+        <h3>알았을 땐 이미 마감</h3>
+        <p>서류 준비에 시간이 걸리는데, 공고를 늦게 보면 준비할 시간이 모자랍니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">HelpR&amp;D가 하는 일</span>
+    <h2>찾기부터 신청 준비까지 함께합니다</h2>
+    <p class="sub">매일 아침 전국 공고를 자동으로 모으고, 사람이 우리 회사에 맞춰 골라 드립니다.</p>
+    <div class="cards4">
+      <div class="svc"><div class="num">1</div><div><h3>맞춤 공고 추천</h3><p>업종·지역·관심 분야(수출, R&amp;D, 채용, 시설 등)를 듣고 신청할 만한 공고를 골라 드립니다.</p></div></div>
+      <div class="svc"><div class="num">2</div><div><h3>신청 자격 검토</h3><p>공고문의 신청요건을 확인해 해당 여부와 준비해야 할 조건을 짚어 드립니다.</p></div></div>
+      <div class="svc"><div class="num">3</div><div><h3>신청 준비 지원</h3><p>사업계획서 방향, 제출 서류 목록, 작성 순서를 함께 정리합니다.</p></div></div>
+      <div class="svc"><div class="num">4</div><div><h3>마감 일정 챙기기</h3><p>관심 공고의 마감일과 새로 올라오는 비슷한 공고를 놓치지 않게 알려 드립니다.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="steps" id="how">
+  <div class="wrap">
+    <h2>진행 방법</h2>
+    <p class="sub">신청서는 1분이면 충분합니다.</p>
+    <ol class="flow">
+      <li><b>상담 신청</b><span>회사명과 연락처만 남겨 주세요.</span></li>
+      <li><b>회사 정보 확인</b><span>업종, 지역, 관심 분야를 간단히 여쭤봅니다.</span></li>
+      <li><b>맞춤 공고 추천</b><span>지금 신청할 만한 사업을 골라 드립니다.</span></li>
+      <li><b>신청 준비</b><span>요건 확인과 서류 준비를 함께합니다.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="now">
+  <div class="wrap">
+    <span class="eyebrow">실시간</span>
+    <h2>지금 신청할 수 있는 부산·울산·경남 공고</h2>
+    <p class="sub">마감이 가까운 순서입니다. 우리 회사에 맞는지 궁금하면 상담을 신청하세요.</p>
+    <div class="list" id="list"><div style="color:var(--muted)">불러오는 중…</div></div>
+    <div class="more"><a href="./">전체 공고 보러 가기 →</a></div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap" style="max-width:800px">
+    <h2>자주 묻는 질문</h2>
+    <details><summary>상담 비용이 있나요?</summary><p>첫 상담은 무료입니다. 남겨 주신 연락처로 연락드려 회사 상황을 듣고 맞는 공고를 안내해 드립니다.</p></details>
+    <details><summary>어떤 회사가 상담받을 수 있나요?</summary><p>중소기업, 소상공인, 개인사업자, 예비창업자 모두 가능합니다. 특히 부산·울산·경남 지역 공고를 집중해서 살펴봅니다.</p></details>
+    <details><summary>공고는 어디서 모으나요?</summary><p>기업마당(bizinfo.go.kr)과 부산·울산·경남·대구·경북·포항 테크노파크 사업공고를 매일 아침 자동으로 모읍니다. 신청 전에는 반드시 원문 공고를 함께 확인합니다.</p></details>
+    <details><summary>선정을 보장하나요?</summary><p>선정은 각 기관의 심사로 결정되므로 보장할 수 없습니다. 대신 해당되는 사업을 빠르게 찾고, 요건을 놓치지 않도록 준비를 돕습니다.</p></details>
+    <details><summary>남긴 개인정보는 어떻게 쓰이나요?</summary><p>상담 연락에만 쓰고, 상담 종료 후 1년 뒤 파기합니다. 자세한 내용은 <a href="privacy.html">개인정보처리방침</a>을 확인하세요.</p></details>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>우리 회사에 맞는 지원사업, 지금 확인하세요</h2>
+    <p>회사명과 연락처만 남기면 맞는 공고를 골라 연락드립니다.</p>
+    <button class="cta" data-consult>무료 상담 신청하기</button>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    공고 출처: 기업마당(bizinfo.go.kr) · 지역 테크노파크 · 신청 전 원문 공고를 꼭 확인하세요<br>
+    © HelpR&amp;D · helprnd.com · <a href="privacy.html"><b>개인정보처리방침</b></a>
+  </div>
+</footer>
+
+<div class="mcta"><button class="cta" data-consult>무료 상담 신청</button></div>
+
+<script>
+(function(){
+  const HOMES = ["부산","울산","경남"];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dday = r => r.end ? Math.round((new Date(r.end+"T00:00:00") - today)/864e5) : 9999;
+  const esc = s => (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const $ = id => document.getElementById(id);
+  fetch("data/announcements.json", {cache:"no-cache"}).then(r => r.json()).then(db => {
+    const open = (db.items || []).filter(r => dday(r) >= 0);
+    const home = open.filter(r => HOMES.includes(r.region));
+    $("n-open").textContent = open.length;
+    $("n-home").textContent = home.length;
+    $("n-hot").textContent = open.filter(r => dday(r) <= 7).length;
+    $("n-tp").textContent = open.filter(r => (r.src && r.src !== "기업마당") || /테크노파크/.test((r.agency||"") + (r.org||""))).length;
+    $("upd").textContent = "업데이트 " + (db.updated || "").replace("T", " ") + " · 매일 아침 자동 수집";
+    const pick = home.sort((a,b) => dday(a) - dday(b)).slice(0, 6);
+    $("list").innerHTML = pick.map(r => {
+      const d = dday(r), hot = d <= 7;
+      return `<a class="ann" href="${esc(r.url)}" target="_blank" rel="noopener">
+        <div class="meta"><span class="tag h">${esc(r.region)}</span><span class="tag">${esc(r.field)}</span>
+          <span class="dd ${hot ? "hot" : ""}">${d === 9999 ? "상시" : d === 0 ? "오늘 마감" : "D-" + d}</span></div>
+        <h4>${esc(r.title)}</h4>
+        <p>${esc(r.support || r.target || r.intro || "")}</p></a>`;
+    }).join("") || '<div style="color:var(--muted)">지금은 표시할 공고가 없어요. 전체 공고를 확인해 주세요.</div>';
+  }).catch(() => { $("upd").textContent = "공고 정보를 불러오지 못했어요."; $("list").innerHTML = ""; });
+})();
+</script>
+<script src="consult.js" data-auto-open="0"></script>
+</body>
+</html>

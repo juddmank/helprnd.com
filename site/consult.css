@@ -1,0 +1,29 @@
+/* helprnd.com 상담 신청 팝업 공용 스타일 (페이지에 --orange 등 색 변수가 있어야 함) */
+.cta{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--orange);color:#fff;
+  font:inherit;font-weight:800;font-size:15px;padding:11px 20px;cursor:pointer;text-decoration:none;box-shadow:0 4px 14px rgba(242,140,40,.35)}
+.cta:hover{filter:brightness(1.05)}
+.modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(15,27,46,.55)}
+.modal.open{display:flex}
+.dialog{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:calc(100vh - 32px);overflow:auto;padding:24px 22px 20px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.dialog h3{margin:0 0 4px;font-size:21px;letter-spacing:-.5px}
+.dialog .lead{margin:0 0 16px;color:var(--muted);font-size:14px}
+.dialog .x{position:absolute;top:10px;right:12px;border:0;background:none;font-size:24px;line-height:1;color:var(--muted);cursor:pointer;padding:6px}
+.f{display:block;margin-bottom:10px}
+.f span{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.f span i{color:var(--red);font-style:normal}
+.f input,.f textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);background:#fff}
+.f input:focus,.f textarea:focus{outline:2px solid #FBD3A8;border-color:var(--orange)}
+.f textarea{min-height:72px;resize:vertical}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.consent{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--muted);margin:6px 0 10px}
+.consent table{width:100%;border-collapse:collapse;margin:6px 0}
+.consent th{text-align:left;font-weight:700;color:var(--ink);padding:2px 8px 2px 0;white-space:nowrap;vertical-align:top}
+.consent td{padding:2px 0}
+.agree{display:flex;gap:8px;align-items:flex-start;font-size:14px;font-weight:700;margin:4px 0 14px;cursor:pointer}
+.agree input{width:18px;height:18px;margin-top:2px;accent-color:var(--orange);flex:none}
+.dialog .cta{width:100%;justify-content:center}
+.dialog .cta[disabled]{opacity:.6;cursor:wait}
+.msg{margin:10px 0 0;font-size:14px;font-weight:700;min-height:20px}
+.msg.err{color:var(--red)} .msg.ok{color:var(--green)}
+.done{text-align:center;padding:16px 4px 6px}
+.done .big{font-size:40px}
