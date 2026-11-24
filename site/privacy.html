@@ -18,6 +18,7 @@ main{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28p
 h1{font-size:26px;margin:0 0 6px;letter-spacing:-.5px}
 h2{font-size:17px;margin:26px 0 6px}
 .muted{color:var(--muted);font-size:14px}
+.notice{background:#FFF3E6;border:1px solid #F5C99A;border-radius:10px;padding:12px 14px;margin:12px 0 4px;font-size:14px}
 table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
 th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
 th{background:var(--bg);width:28%}
@@ -31,6 +32,9 @@ footer{color:var(--muted);font-size:13px;text-align:center;padding:10px 0 30px}
 <main>
   <h1>개인정보처리방침</h1>
   <p class="muted">시행일: <span data-f="effective">2026년 11월 17일</span></p>
+  <div class="notice" role="note"><b>개정 안내 (공고 2026년 11월 24일 · 시행 2026년 12월 1일)</b><br>
+  맞춤 지원사업 안내를 위해 수집 항목에 <b>회사 소재지(시·도)</b>와 <b>업종</b>을 추가합니다.
+  시행 전까지는 상담 신청 화면에서 이 항목을 안내하고 따로 동의를 받은 경우에만 수집합니다.</div>
 
   <p><b data-f="operator">KCM(인증) · HelpR&amp;D(helprnd.com)</b>(이하 "운영자")는 「개인정보 보호법」에 따라 이용자의 개인정보를 보호하고,
   관련 고충을 신속하게 처리할 수 있도록 다음과 같이 개인정보처리방침을 정합니다.</p>
@@ -38,7 +42,7 @@ footer{color:var(--muted);font-size:13px;text-align:center;padding:10px 0 30px}
   <h2>1. 처리하는 개인정보 항목과 목적</h2>
   <table>
     <tr><th>수집 방법</th><td>홈페이지 '무료 상담 신청' 팝업에 이용자가 직접 입력</td></tr>
-    <tr><th>항목</th><td>(필수) 회사명, 지역(시·도), 업종, 담당자 이름, 전화번호, 이메일<br>(선택) 문의내용</td></tr>
+    <tr><th>항목</th><td>(필수) 회사명, 담당자 이름, 전화번호, 이메일<br>(선택) 문의내용<br><span class="muted">※ 2026년 12월 1일부터 (필수) 회사 소재지(시·도), 업종 추가</span></td></tr>
     <tr><th>목적</th><td>지원사업 상담 및 맞춤 지원사업 공고 안내를 위한 연락</td></tr>
   </table>
   <p>운영자는 위 목적 외의 용도로 개인정보를 이용하지 않으며, 목적이 바뀌는 경우 미리 별도의 동의를 받습니다.
@@ -58,7 +62,7 @@ footer{color:var(--muted);font-size:13px;text-align:center;padding:10px 0 30px}
   <table>
     <tr><th>수탁자 · 업무</th><td><b>Supabase Inc.</b> · 상담 신청 정보 저장(데이터베이스)<br><b>Resend Inc.</b> · 신청 알림 및 접수 확인 메일 발송</td></tr>
     <tr><th>저장 위치</th><td>Supabase: 대한민국 서울 리전(AWS ap-northeast-2)</td></tr>
-    <tr><th>국외 이전</th><td>Resend Inc.(미국) · 메일 발송 시점에 네트워크를 통해 전송 · 이전 항목: 회사명, 지역, 업종, 담당자 이름, 전화번호, 이메일, 문의내용 · 보유: 발송 기록 보관 기간(최대 30일 내외) 후 삭제</td></tr>
+    <tr><th>국외 이전</th><td>Resend Inc.(미국) · 메일 발송 시점에 네트워크를 통해 전송 · 이전 항목: 회사명, 담당자 이름, 전화번호, 이메일, 문의내용(2026년 12월 1일부터 지역·업종 포함) · 보유: 발송 기록 보관 기간(최대 30일 내외) 후 삭제</td></tr>
   </table>
   <p>국외 이전을 원하지 않으시면 상담 신청을 하지 않으실 수 있으며, 이 경우 상담 서비스를 제공받기 어렵습니다.</p>
 
@@ -89,7 +93,7 @@ footer{color:var(--muted);font-size:13px;text-align:center;padding:10px 0 30px}
 
   <h2>10. 방침의 변경</h2>
   <p>이 개인정보처리방침이 바뀌는 경우 시행 7일 전부터 홈페이지를 통해 알립니다.</p>
-  <p class="muted">변경 이력: 2026년 11월 24일 — 맞춤 지원사업 안내를 위해 수집 항목에 회사 소재지(시·도)·업종 추가</p>
+  <p class="muted">변경 이력: 2026년 11월 24일 공고 · 2026년 12월 1일 시행 예정 — 맞춤 지원사업 안내를 위해 수집 항목에 회사 소재지(시·도)·업종 추가</p>
 </main>
 <footer><a href="./">← HelpR&amp;D 홈으로</a></footer>
 </div>
