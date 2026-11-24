@@ -18,6 +18,8 @@ create table if not exists public.leads (
 -- 2026-11-24 추가: 맞춤 지원사업 매칭용 소재지(시·도)·업종
 alter table public.leads add column if not exists region   text check (char_length(region) <= 10);
 alter table public.leads add column if not exists industry text check (char_length(industry) <= 40);
+-- 2026-11-24 추가: 신청 때 자동으로 고른 추천 공고 (lead 함수가 저장)
+alter table public.leads add column if not exists matches  jsonb;
 
 -- 보안: 행 수준 보안(RLS)을 켜고 공개 정책은 만들지 않는다.
 -- → 사이트 방문자(공개 키)로는 읽기·쓰기 모두 불가. 저장은 서버 함수(lead)만 한다.
