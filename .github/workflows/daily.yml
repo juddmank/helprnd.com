@@ -56,6 +56,7 @@ jobs:
 
   deploy:
     needs: [build]
+    if: always() && needs.build.result == 'success'   # update 가 건너뛰어진(push) 경우에도 배포
     runs-on: ubuntu-latest
     environment:
       name: github-pages
