@@ -1,10 +1,10 @@
 {
   "last_num": 128107,
-  "last_run": "2026-11-24",
+  "last_run": "2026-11-25",
   "btp_last_seq": 9582714,
   "utp_last_seq": 613,
   "gntp_last_seq": 3866,
   "ttp_last_seq": 15872,
-  "ptp_last_seq": 8243,
-  "gbtp_last_seq": 11825
+  "ptp_last_seq": 8246,
+  "gbtp_last_seq": 11827
 }
