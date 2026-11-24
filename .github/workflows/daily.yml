@@ -39,13 +39,12 @@ jobs:
           git commit -m "공고 업데이트 $(TZ=Asia/Seoul date +%F)" || echo "변경 없음"
           git push
 
-  deploy:
+  # 올리기(build)와 배포(deploy)를 다른 작업으로 나눔: 같은 작업 안에서 바로 배포하면
+  # 가끔 "No artifacts named github-pages" 로 실패하는 GitHub 문제가 있어서 (2026-11-24)
+  build:
     needs: [update]
     if: always() && (needs.update.result == 'success' || needs.update.result == 'skipped')
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,5 +53,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
