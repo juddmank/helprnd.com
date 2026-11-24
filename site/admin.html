@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314243D'/%3E%3Cpath d='M9 23V9h4v5h6V9h4v14h-4v-5h-6v5z' fill='%23F28C28'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-:root{--navy:#14243D;--navy-2:#1F3557;--orange:#F28C28;--orange-soft:#FFF3E6;--ink:#1E2633;--muted:#667085;--line:#E4E7EC;--bg:#F5F7FA;--red:#D64545;--green:#1F8A5B;--blue:#2B4C8C}
+:root{--navy:#14243D;--navy-2:#1F3557;--orange:#F28C28;--orange-soft:#FFF3E6;--orange-d:#B35400;--ink:#1E2633;--muted:#667085;--line:#E4E7EC;--bg:#F5F7FA;--red:#C53030;--green:#17704A;--blue:#2B4C8C}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,"Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.55}
@@ -20,7 +20,7 @@ header .wrap{height:58px;display:flex;align-items:center;justify-content:space-b
 button,select,input,textarea{font:inherit}
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:14px;color:var(--ink)}
 .btn:hover{border-color:#C3CAD6}
-.btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.pri{background:var(--orange-d);border-color:var(--orange-d);color:#fff}
 .btn.ghost{background:transparent;color:#C9D3E3;border-color:rgba(255,255,255,.25)}
 .btn.danger{color:var(--red)}
 .btn[disabled]{opacity:.6;cursor:wait}
@@ -56,7 +56,7 @@ button,select,input,textarea{font:inherit}
 .side textarea{border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:64px;resize:vertical;font-size:14px}
 .side .row{display:flex;gap:8px;align-items:center;justify-content:space-between}
 .saved{font-size:12px;color:var(--green);min-height:16px}
-.st-신규{color:#B4610F}.st-연락함{color:var(--blue)}.st-상담중{color:#7A3FB8}.st-완료{color:var(--green)}.st-보류{color:var(--muted)}
+.st-신규{color:#9A4E0A}.st-연락함{color:var(--blue)}.st-상담중{color:#7A3FB8}.st-완료{color:var(--green)}.st-보류{color:var(--muted)}
 .match{margin-top:10px;font-size:13px}
 .match b{font-size:12.5px;color:var(--navy)}
 .match ol{margin:4px 0 0;padding-left:18px}
@@ -88,7 +88,7 @@ button,select,input,textarea{font:inherit}
 <main class="wrap" id="app" hidden>
   <div class="stats">
     <div class="stat"><div class="n" id="s-all">-</div><div class="l">전체 신청</div></div>
-    <div class="stat"><div class="n" id="s-new" style="color:#B4610F">-</div><div class="l">신규 (아직 연락 전)</div></div>
+    <div class="stat"><div class="n" id="s-new" style="color:#9A4E0A">-</div><div class="l">신규 (아직 연락 전)</div></div>
     <div class="stat"><div class="n" id="s-week">-</div><div class="l">최근 7일</div></div>
     <div class="stat"><div class="n" id="s-done" style="color:var(--green)">-</div><div class="l">상담 완료</div></div>
   </div>
@@ -253,9 +253,10 @@ button,select,input,textarea{font:inherit}
         .forEach((t, k) => s.addText(`${k + 1}. ${t}`, { x: 7.1, y: 1.4 + k * 0.95, w: 5.6, h: 0.9, fontSize: 13, color: C.ink, fontFace: FONT, valign: "top" }));
       // 3 한눈에 표
       if (list.length) {
-        s = p.addSlide(); head(s, "추천 지원사업 한눈에", `${list.length}건`);
         const hd = ["순위", "지원사업명 (누르면 공고로 이동)", "분야", "왜 맞나", "마감"].map(t => ({ text: t, options: { bold: true, color: "FFFFFF", fill: { color: C.navy } } }));
-        const body = list.map((x, i) => {
+        for (let st = 0; st < list.length; st += 5) {   // 한 장에 5건씩 (표가 화면 밖으로 넘치지 않게)
+        s = p.addSlide(); head(s, "추천 지원사업 한눈에", `${st + 1}–${Math.min(st + 5, list.length)} / ${list.length}건`);
+        const body = list.slice(st, st + 5).map((x, j) => { const i = st + j;
           const [lab, d] = dday(x.end, today); const urg = d <= 7;
           const fill = { color: i % 2 ? C.zebra : "FFFFFF" };
           return [{ text: String(i + 1), options: { bold: true, color: C.navy, align: "center", fill } },
@@ -264,7 +265,8 @@ button,select,input,textarea{font:inherit}
             { text: shorten(x.why.join(" · "), 70), options: { color: C.muted, fontSize: 9.5, fill } },
             { text: `${lab}\n${x.end || "상시"}`, options: { color: urg ? C.red : C.muted, bold: urg, align: "center", fontSize: 9.5, fill } }];
         });
-        s.addTable([hd, ...body], { x: 0.45, y: 1.25, w: 12.3, colW: [0.6, 5.9, 0.8, 3.6, 1.4], fontSize: 11, fontFace: FONT, border: { type: "solid", color: C.line, pt: 0.75 }, valign: "middle" });
+        s.addTable([hd, ...body], { x: 0.45, y: 1.25, w: 12.3, colW: [0.6, 5.9, 0.8, 3.6, 1.4], rowH: [0.45, 1, 1, 1, 1, 1].slice(0, body.length + 1), fontSize: 11, fontFace: FONT, border: { type: "solid", color: C.line, pt: 0.75 }, valign: "middle" });
+        }
         // 4 자세히 (2건씩)
         const top = list.slice(0, 6);
         for (let k = 0; k < top.length; k += 2) {

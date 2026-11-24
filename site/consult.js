@@ -49,9 +49,9 @@
     const d = Object.fromEntries(new FormData(form).entries());
     d.consent = form.consent.checked;
     d.page = location.href;
-    const need = [["company","회사명을"],["region","지역을"],["industry","업종을"],["name","담당자 이름을"],["phone","전화번호를"],["email","이메일을"]];
+    const need = [["company","회사명을 입력해 주세요."],["region","지역을 선택해 주세요."],["industry","업종을 입력해 주세요."],["name","담당자 이름을 입력해 주세요."],["phone","전화번호를 입력해 주세요."],["email","이메일을 입력해 주세요."]];
     const miss = need.find(([k]) => !String(d[k] || "").trim());
-    if(miss){ return fail(miss[1] + " 입력해 주세요.", form[miss[0]]); }
+    if(miss){ return fail(miss[1], form[miss[0]]); }
     if(!/^[0-9\-+ ]{8,20}$/.test(d.phone.trim())) return fail("전화번호를 확인해 주세요.", form.phone);
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim())) return fail("이메일 형식을 확인해 주세요.", form.email);
     if(!d.consent) return fail("개인정보 수집·이용에 동의해 주세요.", form.consent);

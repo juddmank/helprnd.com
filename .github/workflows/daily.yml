@@ -37,7 +37,7 @@ jobs:
           git config user.email "helprnd-bot@users.noreply.github.com"
           git add site data
           git commit -m "공고 업데이트 $(TZ=Asia/Seoul date +%F)" || echo "변경 없음"
-          git push
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 5; done; exit 1
 
   # 올리기(build)와 배포(deploy)를 다른 작업으로 나눔: 같은 작업 안에서 바로 배포하면
   # 가끔 "No artifacts named github-pages" 로 실패하는 GitHub 문제가 있어서 (2026-11-24)

@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{
-  --navy:#14243D; --navy-2:#1F3557; --orange:#F28C28; --orange-soft:#FFF3E6;
+  --navy:#14243D; --navy-2:#1F3557; --orange:#F28C28; --orange-soft:#FFF3E6; --orange-d:#B35400;
   --ink:#1E2633; --muted:#667085; --line:#E4E7EC; --bg:#F5F7FA; --card:#FFFFFF;
-  --red:#D64545; --green:#1F8A5B; --radius:16px;
+  --red:#C53030; --green:#17704A; --radius:16px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -22,7 +22,7 @@ body{margin:0;background:#fff;color:var(--ink);font-family:Pretendard,"Malgun Go
 a{color:inherit}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 section{padding:72px 0}
-.eyebrow{display:inline-block;font-size:13px;font-weight:800;color:#B4610F;background:var(--orange-soft);border-radius:999px;padding:4px 12px;margin-bottom:12px}
+.eyebrow{display:inline-block;font-size:13px;font-weight:800;color:#9A4E0A;background:var(--orange-soft);border-radius:999px;padding:4px 12px;margin-bottom:12px}
 h2{font-size:32px;line-height:1.3;letter-spacing:-.8px;margin:0 0 12px}
 .sub{color:var(--muted);font-size:17px;margin:0 0 32px}
 
@@ -86,7 +86,7 @@ header.top .wrap{display:flex;align-items:center;justify-content:space-between;h
 .ann:hover{border-color:var(--orange)}
 .ann .meta{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:700}
 .tag{padding:2px 8px;border-radius:6px;background:#EEF2F7;color:var(--navy-2)}
-.tag.h{background:var(--orange-soft);color:#B4610F}
+.tag.h{background:var(--orange-soft);color:#9A4E0A}
 .dd{margin-left:auto;color:var(--muted)} .dd.hot{color:var(--red)}
 .ann h4{margin:0;font-size:15px;line-height:1.45;letter-spacing:-.2px}
 .ann p{margin:0;font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -95,6 +95,8 @@ header.top .wrap{display:flex;align-items:center;justify-content:space-between;h
 
 /* faq */
 details{border-bottom:1px solid var(--line);padding:18px 4px}
+.faqs{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;align-items:start}  /* PC에서는 질문을 2칸으로 */
+@media (max-width:760px){.faqs{grid-template-columns:1fr}}
 summary{cursor:pointer;font-weight:700;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:12px}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"+";color:var(--orange);font-size:22px;line-height:1}
@@ -102,7 +104,7 @@ details[open] summary::after{content:"−"}
 details p{margin:10px 0 0;color:var(--muted)}
 
 /* final */
-.final{background:linear-gradient(135deg,var(--orange),#E5731A);color:#fff;text-align:center}
+.final{background:linear-gradient(135deg,#B35400,#9A4700);color:#fff;text-align:center}
 .final h2{color:#fff;font-size:34px}
 .final p{font-size:17px;margin:0 0 26px;opacity:.95}
 .final .cta{background:var(--navy);font-size:17px;padding:14px 28px;box-shadow:0 6px 18px rgba(20,36,61,.35)}
@@ -201,7 +203,7 @@ footer a{color:#C9D3E3}
     <h2>진행 방법</h2>
     <p class="sub">신청서는 1분이면 충분합니다.</p>
     <ol class="flow">
-      <li><b>상담 신청</b><span>회사명과 연락처만 남겨 주세요.</span></li>
+      <li><b>상담 신청</b><span>회사명·지역·업종과 연락처만 남겨 주세요.</span></li>
       <li><b>회사 정보 확인</b><span>업종, 지역, 관심 분야를 간단히 여쭤봅니다.</span></li>
       <li><b>맞춤 공고 추천</b><span>지금 신청할 만한 사업을 골라 드립니다.</span></li>
       <li><b>신청 준비</b><span>요건 확인과 서류 준비를 함께합니다.</span></li>
@@ -220,20 +222,22 @@ footer a{color:#C9D3E3}
 </section>
 
 <section id="faq">
-  <div class="wrap" style="max-width:800px">
+  <div class="wrap">
     <h2>자주 묻는 질문</h2>
+    <div class="faqs">
     <details><summary>상담 비용이 있나요?</summary><p>첫 상담은 무료입니다. 남겨 주신 연락처로 연락드려 회사 상황을 듣고 맞는 공고를 안내해 드립니다.</p></details>
     <details><summary>어떤 회사가 상담받을 수 있나요?</summary><p>중소기업, 소상공인, 개인사업자, 예비창업자 모두 가능합니다. 특히 부산·울산·경남 지역 공고를 집중해서 살펴봅니다.</p></details>
     <details><summary>공고는 어디서 모으나요?</summary><p>기업마당(bizinfo.go.kr)과 부산·울산·경남·대구·경북·포항 테크노파크 사업공고를 매일 아침 자동으로 모읍니다. 신청 전에는 반드시 원문 공고를 함께 확인합니다.</p></details>
     <details><summary>선정을 보장하나요?</summary><p>선정은 각 기관의 심사로 결정되므로 보장할 수 없습니다. 대신 해당되는 사업을 빠르게 찾고, 요건을 놓치지 않도록 준비를 돕습니다.</p></details>
     <details><summary>남긴 개인정보는 어떻게 쓰이나요?</summary><p>상담 연락에만 쓰고, 상담 종료 후 1년 뒤 파기합니다. 자세한 내용은 <a href="privacy.html">개인정보처리방침</a>을 확인하세요.</p></details>
+    </div>
   </div>
 </section>
 
 <section class="final">
   <div class="wrap">
     <h2>우리 회사에 맞는 지원사업, 지금 확인하세요</h2>
-    <p>회사명과 연락처만 남기면 맞는 공고를 골라 연락드립니다.</p>
+    <p>회사명·지역·업종과 연락처만 남기면 맞는 공고를 골라 연락드립니다.</p>
     <button class="cta" data-consult>무료 상담 신청하기</button>
   </div>
 </section>

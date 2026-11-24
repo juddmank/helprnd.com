@@ -1,5 +1,5 @@
 /* helprnd.com 상담 신청 팝업 공용 스타일 (페이지에 --orange 등 색 변수가 있어야 함) */
-.cta{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--orange);color:#fff;
+.cta{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--orange-d,#B35400);color:#fff;
   font:inherit;font-weight:800;font-size:15px;padding:11px 20px;cursor:pointer;text-decoration:none;box-shadow:0 4px 14px rgba(242,140,40,.35)}
 .cta:hover{filter:brightness(1.05)}
 .modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(15,27,46,.55)}

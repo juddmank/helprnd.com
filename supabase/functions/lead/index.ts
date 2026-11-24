@@ -45,7 +45,7 @@ const TOTAL_PER_HOUR = 60;
     "보안", "의류", "맛집", "서점", "선박", "GPU", "도서", "미용", "카페", "한복", "전통주", "원예", "포상", "유공자", "카드수수료", "동백전"];
   const AGENCY_CALL = ["운영기관", "수행기관", "전문기관", "주관기관", "위탁기관", "협력기관", "연구개발기관", "평가위원", "심사위원", "강사"];
   const TYPE_ONLY = ["장애인기업", "여성기업", "사회적기업", "마을기업", "협동조합", "자활기업", "청년기업"];
-  const PEOPLE_ONLY = ["농업인", "농업경영체", "농업법인", "농가", "어업인", "어가", "예비창업자", "주민", "가구", "학생", "구직자"];
+  const PEOPLE_ONLY = ["농업인", "농업경영체", "농업법인", "농가", "어업인", "어가", "예비창업자", "지역 주민", "관내 주민", "1인 가구", "저소득 가구", "학생", "구직자"];
 
   const words = t => String(t || "").replace(/업(?=\s|,|$)/g, " ").split(/[\s,/·()\[\]]+/).filter(w => w.length >= 2);
 
@@ -66,11 +66,11 @@ const TOTAL_PER_HOUR = 60;
       const body = [title, it.target, it.support, it.intro].join(" ").toLowerCase();
       if (it.end && it.end <= today) continue;                         // 오늘 마감·지난 공고
       const ir = it.region || "전국";
-      if (region && region !== "해외·기타" && ir !== "전국" && ir !== region) continue;
+      if (ir !== "전국" && (!region || region === "해외·기타" || ir !== region)) continue;  // 지역 전용 공고는 같은 지역만
       if (SECTORS.some(w => title.includes(w) && !mine.includes(w))) continue;
       if (AGENCY_CALL.some(w => title.includes(w))) continue;
       if (TYPE_ONLY.some(w => title.includes(w) && !mine.includes(w))) continue;
-      if (PEOPLE_ONLY.some(w => tgt.includes(w)) && !/기업|사업자/.test(tgt)) continue;
+      if (PEOPLE_ONLY.some(w => tgt.includes(w) && !mine.includes(w)) && !/기업|사업자|업체|소공인/.test(tgt)) continue;
       let s = ir === region ? 30 : 12;
       const why = ir === region ? [region + " 기업 대상"] : [];
       if (fields.has(it.field)) { s += 25; why.push("관심 분야(" + it.field + ")"); }
