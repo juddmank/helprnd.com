@@ -1,0 +1,16 @@
+{
+  "name": "HelpR&D · 정부지원사업 공고",
+  "short_name": "HelpR&D",
+  "description": "매일 아침 새 정부지원사업 공고를 지역·분야·마감일별로 정리합니다.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F5F7FA",
+  "theme_color": "#14243D",
+  "lang": "ko",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
