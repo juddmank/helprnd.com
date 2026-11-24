@@ -11,6 +11,9 @@
 .f{display:block;margin-bottom:10px}
 .f span{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
 .f span i{color:var(--red);font-style:normal}
+.f2{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+.f select{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);background:#fff}
+.f select:focus{outline:2px solid #FBD3A8;border-color:var(--orange)}
 .f input,.f textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);background:#fff}
 .f input:focus,.f textarea:focus{outline:2px solid #FBD3A8;border-color:var(--orange)}
 .f textarea{min-height:72px;resize:vertical}

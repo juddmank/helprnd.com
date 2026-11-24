@@ -10,6 +10,8 @@
 // SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 는 Supabase가 자동으로 넣어 줍니다.
 
 const ALLOWED_ORIGINS = ["https://helprnd.com", "https://www.helprnd.com", "http://localhost:8765"];
+const REGIONS = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
+  "충북", "충남", "전북", "전남", "경북", "경남", "제주", "해외·기타"];
 const PER_IP_PER_HOUR = 5;
 const TOTAL_PER_HOUR = 60;
 
@@ -90,7 +92,9 @@ Deno.serve(async (req) => {
   const email = clip(body.email, 80);
   const message = clip(body.message, 1000);
   const page = clip(body.page, 200);
-  if (!company || !name || !phone || !email) return reply(origin, false, "필수 항목을 모두 입력해 주세요.", 400);
+  const region = REGIONS.includes(clip(body.region, 10)) ? clip(body.region, 10) : "";
+  const industry = clip(body.industry, 40);
+  if (!company || !name || !phone || !email || !region || !industry) return reply(origin, false, "필수 항목을 모두 입력해 주세요.", 400);
   if (phone.replace(/\D/g, "").length < 8) return reply(origin, false, "전화번호를 확인해 주세요.", 400);
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return reply(origin, false, "이메일 형식을 확인해 주세요.", 400);
   if (body.consent !== true) return reply(origin, false, "개인정보 수집·이용에 동의해 주세요.", 400);
@@ -106,7 +110,7 @@ Deno.serve(async (req) => {
     const ins = await db("leads", {
       method: "POST",
       headers: { Prefer: "return=minimal" },
-      body: JSON.stringify({ company, name, phone, email, message: message || null, consent: true, page, ip_hash: ipHash }),
+      body: JSON.stringify({ company, name, phone, email, region, industry, message: message || null, consent: true, page, ip_hash: ipHash }),
     });
     if (!ins.ok) {
       console.error("insert error", ins.status, await ins.text());
@@ -114,7 +118,7 @@ Deno.serve(async (req) => {
     }
 
     const when = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-    const rows = [["회사명", company], ["담당자", name], ["전화번호", phone], ["이메일", email], ["문의내용", message || "(없음)"], ["접수시각", when]]
+    const rows = [["회사명", company], ["지역", region], ["업종", industry], ["담당자", name], ["전화번호", phone], ["이메일", email], ["문의내용", message || "(없음)"], ["접수시각", when]]
       .map(([k, v]) => `<tr><th align="left" style="padding:4px 12px 4px 0;color:#667085">${k}</th><td style="padding:4px 0">${esc(v).replace(/\n/g, "<br>")}</td></tr>`)
       .join("");
     const notify = env("NOTIFY_EMAIL");

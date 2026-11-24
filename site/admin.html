@@ -158,7 +158,7 @@ button,select,input,textarea{font:inherit}
   function visible(){
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
     return rows.filter(r => (filter === "전체" || r.status === filter) &&
-      words.every(w => [r.company, r.name, r.phone, r.email, r.message, r.memo].join(" ").toLowerCase().includes(w)));
+      words.every(w => [r.company, r.region, r.industry, r.name, r.phone, r.email, r.message, r.memo].join(" ").toLowerCase().includes(w)));
   }
   function render(){
     const list = visible();
@@ -170,6 +170,7 @@ button,select,input,textarea{font:inherit}
       <div class="lead ${r.status === "신규" ? "new" : ""}" data-id="${r.id}">
         <div>
           <h3>${esc(r.company)}</h3>
+          ${r.region || r.industry ? `<div class="when"><b>${esc(r.region || "-")}</b> · ${esc(r.industry || "-")}</div>` : ""}
           <div class="when">${new Date(r.created_at).toLocaleString("ko-KR")} · #${r.id}</div>
           <div class="q">${esc(r.message)}</div>
         </div>
@@ -224,10 +225,10 @@ button,select,input,textarea{font:inherit}
   $("q").addEventListener("input", e => { q = e.target.value; render(); });
   $("refresh").onclick = load;
   $("csv").onclick = () => {
-    const head = ["번호","접수시각","회사명","담당자","전화번호","이메일","문의내용","상태","메모"];
+    const head = ["번호","접수시각","회사명","지역","업종","담당자","전화번호","이메일","문의내용","상태","메모"];
     const cell = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const lines = [head.map(cell).join(",")].concat(visible().map(r =>
-      [r.id, new Date(r.created_at).toLocaleString("ko-KR"), r.company, r.name, r.phone, r.email, r.message, r.status, r.memo].map(cell).join(",")));
+      [r.id, new Date(r.created_at).toLocaleString("ko-KR"), r.company, r.region, r.industry, r.name, r.phone, r.email, r.message, r.status, r.memo].map(cell).join(",")));
     const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
